@@ -1,16 +1,12 @@
 #define GLIB_VERSION_2_28               (G_ENCODE_VERSION (2, 28))
 #define GLIB_VERSION_MIN_REQUIRED       GLIB_VERSION_2_28
 
-#include <gtk/gtk.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include "full_search.h"
 
 #define BUFFER_SIZE 50000
 #define SEARCH_PATH 1
 
-#include "glib_regex.c"
+//#include "glib_regex.c"
 
 int counter = 0;
 
@@ -22,7 +18,8 @@ guint gCount;
 guint gLimit = 3;
 
 gchar* 
-extract_filename(gchar* filepath) {
+extract_filename(gchar* filepath) 
+{
   gchar*  filename;
   gchar** tokens;
   int     tokennum;
@@ -36,7 +33,8 @@ extract_filename(gchar* filepath) {
 }
 
 gchar* 
-read_file(gchar* filename) {
+read_file(gchar* filename) 
+{
   gchar *contents;
   gsize len;
   GError *err = NULL;
@@ -66,7 +64,9 @@ void add_to_list(GObject* widget,
   gtk_list_store_set(liststore, &iter, 0, str0, 1, str1, 2, str2, 3, str3, 4, str4, -1, str5, -1);
 }
 
-void clear_list(GObject* widget) {
+void 
+clear_list(GObject* widget) 
+{
   GtkTreeView *treeview = NULL;
   GtkTreeModel *model = NULL;
   GtkListStore *liststore = NULL;
@@ -109,7 +109,9 @@ _main_loop (gpointer treeview)
   return TRUE;
 }
 
-int search_process(gchar* needle) {
+int 
+search_process(gchar* needle) 
+{
   char *argv [15];
   GPid child_pid;
   int status;
@@ -139,7 +141,8 @@ int search_process(gchar* needle) {
 }
 
 void
-preedit_changed (GtkEntry *widget, gpointer treeview)  {
+preedit_changed (GtkEntry *widget, gpointer treeview)
+{
     clear_list(treeview);
 
     gchar* needle = (gchar*)gtk_entry_get_text(GTK_ENTRY(widget));
@@ -149,7 +152,9 @@ preedit_changed (GtkEntry *widget, gpointer treeview)  {
     }
 }
 
-int count_lines(gchar* contents, int len) {
+int 
+count_lines(gchar* contents, int len) 
+{
     int count = 0;
     for (int i=0; i<len; i++) {
         if (contents[i]==10) { // here checking for newline, could be also '\n'
@@ -159,7 +164,9 @@ int count_lines(gchar* contents, int len) {
     return count;
 }
 
-void on_changed_full_search(GtkTreeSelection *widget, gpointer textbufferscroll) {
+void 
+on_changed_full_search(GtkTreeSelection *widget, gpointer textbufferscroll) 
+{
     GObject *textbuffer, *textview;
     GtkTextIter start_iter, end_iter;
     GtkTreeIter iter;
@@ -209,7 +216,8 @@ void on_changed_full_search(GtkTreeSelection *widget, gpointer textbufferscroll)
 
 void
 adjustment_changed (GtkAdjustment *adjustment,
-                    gpointer userdata) {
+                    gpointer userdata)
+{
     gdouble upper, pagesize, factor;
 
     upper = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adjustment));
@@ -310,20 +318,5 @@ GObject* full_search_window_new() {
   return window;
 }
 
-#if !FULL_SEARCH
 
-int
-main (int   argc, char *argv[])
-{
-  GObject *window;
 
-  gtk_init (&argc, &argv);
-
-  window = full_search_window_new();
-
-  gtk_main ();
-
-  return 0;
-}
-
-#endif
