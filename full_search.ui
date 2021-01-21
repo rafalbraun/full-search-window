@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+   <object class="GtkListStore" id="liststore1">
+      <columns>
+         <column type="gchararray" />
+         <column type="gchararray" />
+         <column type="gchararray" />
+         <column type="gchararray" />
+         <column type="gchararray" />
+         <column type="gchararray" />
+      </columns>
+   </object>
+   <object class="GtkListStore" id="combobox_model">
+      <columns>
+         <column type="gchararray" />
+      </columns>
+      <data>
+         <row><col id="0" translatable="yes">*.c</col>        </row>
+         <row><col id="0" translatable="yes">*.cpp</col>      </row>
+         <row><col id="0" translatable="yes">*.css</col>      </row>
+         <row><col id="0" translatable="yes">*.groovy</col>   </row>
+         <row><col id="0" translatable="yes">*.java</col>     </row>
+      </data>
+   </object>
+   <object id="window" class="GtkWindow">
+      <property name="visible">True</property>
+      <property name="title">Full Search</property>
+      <property name="border-width">2</property>
+      <property name="default-width">1000</property>
+      <property name="default-height">800</property>
+      <child>
+         <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+               <object class="GtkBox">
+                  <property name="visible">True</property>
+                  <property name="can_focus">False</property>
+                  <property name="orientation">horizontal</property>
+                  <child>
+                     <object class="GtkCheckButton">
+                        <property name="visible">True</property>
+                        <property name="label">Regex</property>
+                     </object>
+                     <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                     </packing>
+                  </child>
+                  <child>
+                     <object class="GtkCheckButton">
+                        <property name="visible">True</property>
+                        <property name="label">Match Case</property>
+                     </object>
+                     <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                     </packing>
+                  </child>
+                  <child>
+                     <object class="GtkCheckButton">
+                        <property name="visible">True</property>
+                        <property name="label">File Mask:</property>
+                        <property name="halign">GTK_ALIGN_END</property>
+                     </object>
+                     <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                     </packing>
+                  </child>
+                  <child>
+                     <object class="GtkComboBox" id="combobox">
+                        <property name="visible">True</property>
+                        <property name="model">combobox_model</property>
+                        <property name="hexpand">True</property>
+                        <property name="halign">GTK_ALIGN_END</property>
+                        <property name="has-frame">True</property>
+                        <child>
+                           <object class="GtkCellRendererText" id="cellrenderertext18" />
+                           <attributes>
+                              <attribute name="text">0</attribute>
+                           </attributes>
+                        </child>
+                     </object>
+                     <packing>
+                        <property name="position">3</property>
+                     </packing>
+                  </child>
+               </object>
+               <packing>
+                  <property name="expand">False</property>
+                  <property name="fill">False</property>
+                  <property name="position">0</property>
+               </packing>
+            </child>
+            <child>
+               <object class="GtkBox">
+                  <property name="visible">True</property>
+                  <property name="can_focus">False</property>
+                  <property name="orientation">vertical</property>
+                  <property name="border-width">10</property>
+                  <child>
+                     <object class="GtkEntry" id="entry">
+                        <property name="visible">True</property>
+                     </object>
+                     <packing>
+                        <property name="position">1</property>
+                     </packing>
+                  </child>
+               </object>
+               <packing>
+                  <property name="expand">False</property>
+                  <property name="fill">False</property>
+                  <property name="position">1</property>
+               </packing>
+            </child>
+            <child>
+               <object class="GtkPaned" id="paned">
+                  <property name="visible">True</property>
+                  <property name="orientation">vertical</property>
+                  <property name="position">300</property>
+                  <child>
+                     <object class="GtkScrolledWindow">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                           <object class="GtkTreeView" id="treeview1">
+                              <property name="visible">True</property>
+                              <property name="can_focus">True</property>
+                              <property name="model">liststore1</property>
+                              <property name="enable-search">False</property>
+                              <child internal-child="selection">
+                                 <object class="GtkTreeSelection" id="treeview-selection" />
+                              </child>
+                              <child>
+                                 <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                                    <property name="title" translatable="yes">occurrence</property>
+                                    <property name="fixed-width">700</property>
+                                    <child>
+                                       <object class="GtkCellRendererText" id="cellrenderertext1">
+                                          <property name="height">26</property>
+                                       </object>
+                                       <attributes>
+                                          <attribute name="text">0</attribute>
+                                       </attributes>
+                                    </child>
+                                 </object>
+                              </child>
+                              <child>
+                                 <object class="GtkTreeViewColumn" id="treeviewcolumn2">
+                                    <property name="title" translatable="yes">filename</property>
+                                    <property name="fixed-width">230</property>
+                                    <child>
+                                       <object class="GtkCellRendererText" id="cellrenderertext2">
+                                          <property name="height">26</property>
+                                       </object>
+                                       <attributes>
+                                          <attribute name="text">1</attribute>
+                                       </attributes>
+                                    </child>
+                                 </object>
+                              </child>
+                              <child>
+                                 <object class="GtkTreeViewColumn" id="treeviewcolumn3">
+                                    <property name="title" translatable="yes">lnum</property>
+                                    <property name="fixed-width">70</property>
+                                    <child>
+                                       <object class="GtkCellRendererText" id="cellrenderertext3">
+                                          <property name="height">26</property>
+                                       </object>
+                                       <attributes>
+                                          <attribute name="text">2</attribute>
+                                       </attributes>
+                                    </child>
+                                 </object>
+                              </child>
+                              <child>
+                                 <object class="GtkTreeViewColumn" id="treeviewcolumn4">
+                                    <property name="title" translatable="yes">start</property>
+                                    <property name="visible">False</property>
+                                    <child>
+                                       <object class="GtkCellRendererText" id="cellrenderertext4">
+                                          <property name="height">26</property>
+                                       </object>
+                                       <attributes>
+                                          <attribute name="text">3</attribute>
+                                       </attributes>
+                                    </child>
+                                 </object>
+                              </child>
+                              <child>
+                                 <object class="GtkTreeViewColumn" id="treeviewcolumn5">
+                                    <property name="title" translatable="yes">end</property>
+                                    <property name="visible">False</property>
+                                    <child>
+                                       <object class="GtkCellRendererText" id="cellrenderertext5">
+                                          <property name="height">26</property>
+                                       </object>
+                                       <attributes>
+                                          <attribute name="text">4</attribute>
+                                       </attributes>
+                                    </child>
+                                 </object>
+                              </child>
+                              <child>
+                                 <object class="GtkTreeViewColumn" id="treeviewcolumn6">
+                                    <property name="title" translatable="yes">filepath</property>
+                                    <property name="visible">False</property>
+                                    <child>
+                                       <object class="GtkCellRendererText" id="cellrenderertext6">
+                                          <property name="height">26</property>
+                                       </object>
+                                       <attributes>
+                                          <attribute name="text">5</attribute>
+                                       </attributes>
+                                    </child>
+                                 </object>
+                              </child>
+                           </object>
+                        </child>
+                     </object>
+                  </child>
+                  <child>
+                     <object class="GtkScrolledWindow" id="textbufferscroll">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                           <object class="GtkSourceBuffer" id="textbuffer">
+                              <property name="highlight-syntax">True</property>
+                           </object>
+                           <object class="GtkSourceView">
+                              <property name="highlight-current-line">True</property>
+                              <property name="show-right-margin">True</property>
+                              <property name="show-line-numbers">True</property>
+                              <property name="tab_width">4</property>
+                              <property name="auto_indent">True</property>
+                              <property name="visible">True</property>
+                              <property name="buffer">textbuffer</property>
+                              <property name="editable">True</property>
+                              <property name="monospace">True</property>
+                           </object>
+                        </child>
+                     </object>
+                  </child>
+               </object>
+               <packing>
+                  <property name="expand">True</property>
+                  <property name="fill">True</property>
+                  <property name="position">2</property>
+               </packing>
+            </child>
+         </object>
+      </child>
+   </object>
+</interface>
