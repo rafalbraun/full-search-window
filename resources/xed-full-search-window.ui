@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-   <template class="XedFullSearchWindow" parent="GtkDialog">
+   <!-- interface-requires gtk+ 3.8 -->
    <object class="GtkListStore" id="liststore">
       <columns>
          <column type="gchararray" />
@@ -12,25 +12,24 @@
       </columns>
    </object>
    <object class="GtkListStore" id="combobox_model">
-      <columns>
-         <column type="gchararray" />
-      </columns>
-      <data>
-         <row><col id="0" translatable="yes">*.c</col>        </row>
-         <row><col id="0" translatable="yes">*.cpp</col>      </row>
-         <row><col id="0" translatable="yes">*.css</col>      </row>
-         <row><col id="0" translatable="yes">*.groovy</col>   </row>
-         <row><col id="0" translatable="yes">*.java</col>     </row>
-      </data>
+        <columns>
+            <column type="gchararray" />
+        </columns>
+        <data>
+            <row><col id="0" translatable="yes">*.c</col>        </row>
+            <row><col id="0" translatable="yes">*.cpp</col>      </row>
+            <row><col id="0" translatable="yes">*.css</col>      </row>
+            <row><col id="0" translatable="yes">*.groovy</col>   </row>
+            <row><col id="0" translatable="yes">*.java</col>     </row>
+        </data>
    </object>
-   <object id="window" class="GtkWindow">
-      <property name="visible">True</property>
-      <property name="title">Full Search</property>
-      <property name="border-width">2</property>
+   <template class="XedFullSearchWindow" parent="GtkDialog">
       <property name="default-width">1000</property>
       <property name="default-height">800</property>
-      <child>
-         <object class="GtkBox">
+      <property name="title" translatable="yes">Full Search</property>
+
+      <child internal-child="vbox">
+         <object class="GtkBox" id="dialog-vbox1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
@@ -98,6 +97,7 @@
                   <property name="position">0</property>
                </packing>
             </child>
+
             <child>
                <object class="GtkBox">
                   <property name="visible">True</property>
@@ -119,6 +119,11 @@
                   <property name="position">1</property>
                </packing>
             </child>
+
+            <!--
+                below: GtkSourceView + GtkTreeView
+            -->
+
             <child>
                <object class="GtkPaned" id="paned">
                   <property name="visible">True</property>
@@ -227,7 +232,7 @@
                      </object>
                   </child>
                   <child>
-                     <object class="GtkScrolledWindow" id="textbufferscroll">
+                     <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
@@ -256,8 +261,9 @@
                   <property name="position">2</property>
                </packing>
             </child>
+
          </object>
       </child>
-   </object>
+
    </template>
 </interface>

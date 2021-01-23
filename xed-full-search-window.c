@@ -34,7 +34,7 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 	/* Bind class to template */
 	gtk_widget_class_set_template_from_resource (widget_class,
 	                                             "/org/x/editor/ui/xed-full-search-window.ui");
-
+	
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, treeview);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, liststore);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, treeview_selection);
