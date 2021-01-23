@@ -6,12 +6,16 @@
 
 #include "xed-highlight-mode-selector.h"
 #include "xed-highlight-mode-dialog.h"
+#include "xed-full-search-window.h"
 
 void print_msg(GtkWidget *widget, gpointer window) {
 
   g_print("Button clicked\n");
 
-  GtkWidget* w = xed_highlight_mode_dialog_new (window);
+  //GtkWidget* w = xed_highlight_mode_dialog_new (window);
+
+  GtkWidget* w = GTK_WIDGET(xed_full_search_window_new ());
+
 
   gtk_widget_show (w);
 }
@@ -36,6 +40,7 @@ int main(int argc, char *argv[]) {
   GtkWidget *button;
   GtkWidget *selector;
   GtkWidget *halign;
+  GtkWidget *full_search;
 
   gtk_init(&argc, &argv);
 
@@ -46,7 +51,8 @@ int main(int argc, char *argv[]) {
   
   button = gtk_button_new_with_mnemonic("_Button");
   selector = GTK_WIDGET(xed_highlight_mode_selector_new ());
-  
+  //full_search = GTK_WIDGET(xed_full_search_window_new ());
+
   g_signal_connect(button, "clicked", 
       G_CALLBACK(print_msg), NULL);  
   

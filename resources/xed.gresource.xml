@@ -3,5 +3,6 @@
   <gresource prefix="/org/x/editor/ui">
     <file>xed-highlight-mode-dialog.ui</file>
     <file>xed-highlight-mode-selector.ui</file>
+    <file>xed-full-search-window.ui</file>
   </gresource>
 </gresources>
