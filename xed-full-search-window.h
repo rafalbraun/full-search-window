@@ -13,7 +13,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (XedFullSearchWindow, xed_full_search_window, XED, FULL_SEARCH_WINDOW, GtkDialog)
 
-XedFullSearchWindow *xed_full_search_window_new             (void);
+GtkWidget *xed_full_search_window_new             (GtkWindow *parent);
 
 
 

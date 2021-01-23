@@ -25,6 +25,7 @@ struct _XedFullSearchWindow
 	GtkSourceBuffer *source_buffer;
 	GtkSourceView *source_view;
 
+	gchar* search_path;
 };
 
 G_DEFINE_TYPE (XedFullSearchWindow, xed_full_search_window, GTK_TYPE_DIALOG)
@@ -49,6 +50,7 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, source_view);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, entry);
 
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -58,33 +60,11 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 static void 
 add_to_list(GtkListStore *liststore, const char *occurrence, const char *line, gint lnum, gint start, gint end, const gchar* filepath) 
 {
-  //GtkTreeView *treeview = NULL;
-  //GtkTreeModel *model = NULL;
-  //GtkListStore *liststore = NULL;
   GtkTreeIter iter;
-
-  //treeview = GTK_TREE_VIEW(widget);
-  //model = gtk_tree_view_get_model(treeview);
-  //liststore = GTK_LIST_STORE(model);
 
   gtk_list_store_append(liststore, &iter);
 
-  // NULL on two last ones because they are not for show, they are start/end indicators for highlight
-  gtk_list_store_set(liststore, &iter, 0, occurrence, 1, line, 2, lnum, 3, start, 4, end, -1, filepath, -1);
-}
-
-static void 
-clear_list(GObject* widget) 
-{
-  GtkTreeView *treeview = NULL;
-  GtkTreeModel *model = NULL;
-  GtkListStore *liststore = NULL;
-
-  treeview = GTK_TREE_VIEW(widget);
-  model = gtk_tree_view_get_model(treeview);
-  liststore = GTK_LIST_STORE(model);
-
-  gtk_list_store_clear(liststore);
+  gtk_list_store_set(liststore, &iter, 0, occurrence, 1, line, 2, lnum, 3, start, 4, end, 5, filepath, -1);
 }
 
 static gchar* 
@@ -122,7 +102,6 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
             gchar *word = g_match_info_fetch (match_info, 0);
 
             g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
-            //g_print ("%s \t\t %d \t\t %d \t\t %d \t\t %s ", filename, linenum, start_pos, end_pos, line);
 
             gchar* aaa = extract_filename (filename);
             add_to_list (window->liststore, line, aaa, linenum, start_pos, end_pos, filename);
@@ -191,22 +170,32 @@ static void
 on_entry_key_press_event (GtkWidget                  *entry,
                           XedFullSearchWindow 	     *window)
 {
-	//g_print("aaa \n");
-
-	// dziala
-	//scan_file ("/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder/resources/xed.gresource.xml", "file");
-
 	GtkEntry* e = GTK_ENTRY(entry);
 	guint16 len = gtk_entry_get_text_length (e);
 	const gchar *preedit = gtk_entry_get_text (e);
 
-	g_print ("preedit: %s \n", preedit);
-
 	if (len >= 3) {
 		gtk_list_store_clear (window->liststore);
-		list_directory ("/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder", preedit, window);
-		g_print ("done\n");
+		list_directory (window->search_path, preedit, window);
 	}
+}
+
+void
+row_activated (GtkTreeView       *tree_view,
+               GtkTreePath       *path,
+               GtkTreeViewColumn *column,
+               XedFullSearchWindow           *window) {
+    GtkTreeIter iter;
+	gchar *value;
+
+  	gtk_tree_model_get_iter (GTK_TREE_MODEL (window->liststore),
+                             &iter,
+                             path);
+
+	gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
+
+    g_print("%s \n", value);
+    g_free(value);
 }
 
 static void
@@ -217,15 +206,24 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 	g_signal_connect (window->entry, "changed",
 	                  G_CALLBACK (on_entry_key_press_event), window);
 
+	g_signal_connect (window->treeview, "row-activated", 
+					  G_CALLBACK(row_activated), window);
+
 	//g_signal_connect (selector->treeview, "row-activated",
 	//                  G_CALLBACK (on_row_activated), selector);	
 
+	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
 
 }
 
-XedFullSearchWindow *
-xed_full_search_window_new ()
+GtkWidget *
+xed_full_search_window_new (GtkWindow *parent)
 {
-	return g_object_new (XED_TYPE_FULL_SEARCH_WINDOW, NULL);
+//	return g_object_new (XED_TYPE_FULL_SEARCH_WINDOW, NULL);
+
+	return GTK_WIDGET (g_object_new (XED_TYPE_FULL_SEARCH_WINDOW,
+	                                 "transient-for", parent,
+	                                 NULL));
+
 }
 

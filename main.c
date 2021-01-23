@@ -14,7 +14,7 @@ void print_msg(GtkWidget *widget, gpointer window) {
 
   //GtkWidget* w = xed_highlight_mode_dialog_new (window);
 
-  GtkWidget* w = GTK_WIDGET(xed_full_search_window_new ());
+  GtkWidget* w = GTK_WIDGET(xed_full_search_window_new (window));
 
 
   gtk_widget_show (w);
