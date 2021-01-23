@@ -20,14 +20,11 @@ xed-highlight-mode-dialog.o: xed-highlight-mode-dialog.c
 xed-highlight-mode-selector.o: xed-highlight-mode-selector.c
 	$(CC) -c $(GLIB) xed-highlight-mode-selector.c $(GTK) -o xed-highlight-mode-selector.o
 
-#resources.c: xed.gresource.xml
-#	glib-compile-resources --target=resources.c --generate-source xed.gresource.xml
-
 xed-resources.c: ./resources/xed.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./resources --generate-dependencies ./resources/xed.gresource.xml)
 	$(GLIB_COMPILE_RESOURCES) --target=xed-resources.c --sourcedir=./resources --generate-source ./resources/xed.gresource.xml
 
 clean:
-	rm a.out resources.c *.o
+	rm a.out xed-resources.c *.o
 
 
 

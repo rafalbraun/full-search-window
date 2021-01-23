@@ -29,6 +29,7 @@ void aaa () {
 
 }
 */
+
 int main(int argc, char *argv[]) {
 
   GtkWidget *window;
@@ -49,8 +50,8 @@ int main(int argc, char *argv[]) {
   g_signal_connect(button, "clicked", 
       G_CALLBACK(print_msg), NULL);  
   
-  halign = gtk_vbox_new(TRUE, 0); //gtk_alignment_new(0, 0, 0, 0);
-  gtk_container_add(GTK_CONTAINER(halign), selector);
+  halign = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); //gtk_alignment_new(0, 0, 0, 0);
+  //gtk_container_add(GTK_CONTAINER(halign), selector);
   gtk_container_add(GTK_CONTAINER(halign), button);
   gtk_container_add(GTK_CONTAINER(window), halign);  
 
