@@ -75,11 +75,12 @@ xed_highlight_mode_selector_class_init (XedHighlightModeSelectorClass *klass)
 		                            G_TYPE_NONE,
 		                            1,
 		                            GTK_SOURCE_TYPE_LANGUAGE);
-
+	
 	/* Bind class to template */
-	//gtk_widget_class_set_template_from_resource (widget_class,
-	//	"/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder/xed-highlight-mode-selector.ui");
-	                                             //"/org/x/editor/ui/xed-highlight-mode-selector.ui");
+	gtk_widget_class_set_template_from_resource (widget_class,
+	                                             "/org/x/editor/ui/xed-highlight-mode-selector.ui");
+
+	/*
 	const gchar* filename = "xed-highlight-mode-selector.ui";
 	gchar* contents;
 	GError* err;
@@ -91,6 +92,7 @@ xed_highlight_mode_selector_class_init (XedHighlightModeSelectorClass *klass)
 	}
 	bytes = g_bytes_new_take(contents, len);
 	gtk_widget_class_set_template(GTK_WIDGET_CLASS(widget_class), bytes);
+	*/
 
 	gtk_widget_class_bind_template_child (widget_class, XedHighlightModeSelector, treeview);
 	gtk_widget_class_bind_template_child (widget_class, XedHighlightModeSelector, entry);

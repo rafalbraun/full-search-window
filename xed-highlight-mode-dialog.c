@@ -70,10 +70,10 @@ xed_highlight_mode_dialog_class_init (XedHighlightModeDialogClass *klass)
 	dialog_class->response = xed_highlight_mode_dialog_response;
 
 	/* Bind class to template */
-	//gtk_widget_class_set_template_from_resource (widget_class,
-	//											 "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder/xed-highlight-mode-dialog.ui");
-	                                             //"/org/x/editor/ui/xed-highlight-mode-dialog.ui");
+	gtk_widget_class_set_template_from_resource (widget_class,
+	                                             "/org/x/editor/ui/xed-highlight-mode-dialog.ui");
 
+	/*
 	const gchar* filename = "xed-highlight-mode-dialog.ui";
 	gchar* contents;
 	GError* err;
@@ -85,11 +85,11 @@ xed_highlight_mode_dialog_class_init (XedHighlightModeDialogClass *klass)
 	}
 	bytes = g_bytes_new_take(contents, len);
 	gtk_widget_class_set_template(GTK_WIDGET_CLASS(widget_class), bytes);
+	*/
 
 
 
-
-	//gtk_widget_class_bind_template_child (widget_class, XedHighlightModeDialog, selector);
+	gtk_widget_class_bind_template_child (widget_class, XedHighlightModeDialog, selector);
 }
 
 static void

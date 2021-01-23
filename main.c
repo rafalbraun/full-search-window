@@ -4,8 +4,8 @@
 #include <gtk/gtk.h>
 //#include "full_search.c"
 
-#include "xed-highlight-mode-dialog.h"
 #include "xed-highlight-mode-selector.h"
+#include "xed-highlight-mode-dialog.h"
 
 void print_msg(GtkWidget *widget, gpointer window) {
 
@@ -15,11 +15,25 @@ void print_msg(GtkWidget *widget, gpointer window) {
 
   gtk_widget_show (w);
 }
+/*
+void aaa () {
+    const gchar* ui_string = """
+    <?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <interface>
+        <object class=\"XedHighlightModeSelector\">
+        </object>
+    </interface>
+    """;
+    GtkWidget* tmp = xed_highlight_mode_selector_new ();   
+    //Gtk.Builder builder = new Gtk.Builder.from_string (ui_string, ui_string.length);    
 
+}
+*/
 int main(int argc, char *argv[]) {
 
   GtkWidget *window;
   GtkWidget *button;
+  GtkWidget *selector;
   GtkWidget *halign;
 
   gtk_init(&argc, &argv);
@@ -30,11 +44,13 @@ int main(int argc, char *argv[]) {
   gtk_container_set_border_width(GTK_CONTAINER(window), 15);
   
   button = gtk_button_new_with_mnemonic("_Button");
+  selector = GTK_WIDGET(xed_highlight_mode_selector_new ());
   
   g_signal_connect(button, "clicked", 
       G_CALLBACK(print_msg), NULL);  
   
-  halign = gtk_alignment_new(0, 0, 0, 0);
+  halign = gtk_vbox_new(TRUE, 0); //gtk_alignment_new(0, 0, 0, 0);
+  gtk_container_add(GTK_CONTAINER(halign), selector);
   gtk_container_add(GTK_CONTAINER(halign), button);
   gtk_container_add(GTK_CONTAINER(window), halign);  
 
