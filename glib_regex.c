@@ -92,8 +92,6 @@ void *topfun( void *ptr ) {
     list_directory(dirname, pattern);
 }
 
-#if !SEARCH_PATH
-
 int main(int argc, char* argv[]) {
     pthread_t thread;
     void* ret; 
@@ -115,5 +113,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-#endif

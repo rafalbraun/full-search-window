@@ -5,9 +5,9 @@
       <columns>
          <column type="gchararray" />
          <column type="gchararray" />
-         <column type="gchararray" />
-         <column type="gchararray" />
-         <column type="gchararray" />
+         <column type="gint" />
+         <column type="gint" />
+         <column type="gint" />
          <column type="gchararray" />
       </columns>
    </object>
@@ -80,7 +80,7 @@
                         <property name="halign">GTK_ALIGN_END</property>
                         <property name="has-frame">True</property>
                         <child>
-                           <object class="GtkCellRendererText" id="cellrenderertext18" />
+                           <object class="GtkCellRendererText" />
                            <attributes>
                               <attribute name="text">0</attribute>
                            </attributes>
