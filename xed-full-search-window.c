@@ -15,8 +15,8 @@ struct _XedFullSearchWindow
 	GtkDialog parent_instance;
 
 	GtkWidget *treeview;
+	GtkWidget *selection;
 	GtkListStore *liststore;
-	GtkTreeSelection *treeview_selection;
 	GtkWidget *entry;
 	GtkCheckButton *regex;
 	GtkCheckButton *match_case;
@@ -24,7 +24,9 @@ struct _XedFullSearchWindow
 	GtkComboBox *file_type;
 	GtkSourceBuffer *source_buffer;
 	GtkSourceView *source_view;
+	GtkWidget* scrolled_window;
 
+	gint line_num;
 	gchar* search_path;
 };
 
@@ -40,8 +42,8 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 	                                             "/org/x/editor/ui/xed-full-search-window.ui");
 	
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, treeview);
+	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, selection);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, liststore);
-	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, treeview_selection);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, regex);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, match_case);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, file_mask);
@@ -49,6 +51,7 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, source_buffer);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, source_view);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, entry);
+	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, scrolled_window);
 
 
 }
@@ -104,7 +107,7 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
             g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
 
             gchar* aaa = extract_filename (filename);
-            add_to_list (window->liststore, line, aaa, linenum, start_pos, end_pos, filename);
+            add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
 
             g_free (word);
             g_match_info_next (match_info, NULL);
@@ -180,7 +183,43 @@ on_entry_key_press_event (GtkWidget                  *entry,
 	}
 }
 
-void
+///////////////////////////////////////////////////////////////////////////////
+// wyłączyć do osobnego pliku
+
+static void
+result_func (
+    GtkSourceFileLoader * loader,
+    GAsyncResult *        res,
+    gpointer *            user_data)
+{
+    gboolean success = FALSE;
+
+    success = gtk_source_file_loader_load_finish (loader, res, NULL);
+
+    g_return_if_fail (success);
+}
+
+static void 
+load_file (GtkSourceBuffer* buffer, gchar* path, gpointer user_data) 
+{
+    GtkSourceFileLoader * file_loader;
+    GtkSourceFile * src_file;
+    GFile * file;
+
+    src_file = gtk_source_file_new ();
+    file = g_file_new_for_path (path);
+
+    gtk_source_file_set_location (src_file, file);
+    g_object_unref (file);
+
+    file_loader = gtk_source_file_loader_new (buffer, src_file);
+    gtk_source_file_loader_load_async (file_loader, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, (GAsyncReadyCallback) result_func, buffer);
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void
 row_activated (GtkTreeView       *tree_view,
                GtkTreePath       *path,
                GtkTreeViewColumn *column,
@@ -195,7 +234,45 @@ row_activated (GtkTreeView       *tree_view,
 	gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
 
     g_print("%s \n", value);
+
     g_free(value);
+}
+
+static void
+row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
+    GtkTreeIter iter;
+	gchar *value;
+	gint linenum;
+
+	GtkTreeModel* model = GTK_TREE_MODEL(window->liststore);
+
+    if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
+    	
+		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
+		window->line_num = linenum;
+
+		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
+		load_file (window->source_buffer, value, NULL);
+
+    	g_free(value);
+	}
+}
+
+static void
+adjustment_changed (GtkAdjustment *adjustment,
+                    XedFullSearchWindow *window)
+{
+    gdouble upper, pagesize, factor;
+    gint line_count;
+
+    line_count = gtk_text_buffer_get_line_count (GTK_TEXT_BUFFER(window->source_buffer));
+
+    upper = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adjustment));
+    pagesize = gtk_adjustment_get_page_size (GTK_ADJUSTMENT(adjustment));
+    factor = ( ((gdouble)(window->line_num)) * upper) / (gdouble)line_count - pagesize/2;
+
+    gtk_adjustment_set_value (GTK_ADJUSTMENT(adjustment), factor);
+
 }
 
 static void
@@ -206,11 +283,14 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 	g_signal_connect (window->entry, "changed",
 	                  G_CALLBACK (on_entry_key_press_event), window);
 
+	g_signal_connect (window->selection, "changed", 
+					  G_CALLBACK(row_changed), window);
+
 	g_signal_connect (window->treeview, "row-activated", 
 					  G_CALLBACK(row_activated), window);
 
-	//g_signal_connect (selector->treeview, "row-activated",
-	//                  G_CALLBACK (on_row_activated), selector);	
+  	GtkAdjustment* adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(window->scrolled_window));
+  	g_signal_connect(adjustment, "changed", G_CALLBACK(adjustment_changed), window);
 
 	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
 

@@ -141,7 +141,7 @@
                               <property name="model">liststore</property>
                               <property name="enable-search">False</property>
                               <child internal-child="selection">
-                                 <object class="GtkTreeSelection" id="treeview_selection" />
+                                 <object class="GtkTreeSelection" id="selection" />
                               </child>
                               <child>
                                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
@@ -232,7 +232,7 @@
                      </object>
                   </child>
                   <child>
-                     <object class="GtkScrolledWindow">
+                     <object class="GtkScrolledWindow" id="scrolled_window">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
