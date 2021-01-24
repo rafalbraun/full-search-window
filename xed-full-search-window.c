@@ -107,7 +107,10 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
             g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
 
             gchar* aaa = g_path_get_basename (filename);
-            add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
+
+            if (!g_file_test (filename, G_FILE_TEST_IS_EXECUTABLE)) {
+            	add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
+            }
 
             g_free (word);
             g_match_info_next (match_info, NULL);
@@ -208,7 +211,7 @@ result_func (
 }
 
 static void 
-load_file (GtkSourceBuffer* buffer, gchar* path, XedFullSearchWindow *            window) 
+load_file (GtkSourceBuffer* buffer, gchar* path, XedFullSearchWindow *window) 
 {
     GtkSourceFileLoader * file_loader;
     GtkSourceFile * src_file;
