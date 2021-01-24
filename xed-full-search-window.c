@@ -190,7 +190,7 @@ static void
 result_func (
     GtkSourceFileLoader * loader,
     GAsyncResult *        res,
-    gpointer *            user_data)
+    XedFullSearchWindow * window)
 {
     gboolean success = FALSE;
 
@@ -200,7 +200,7 @@ result_func (
 }
 
 static void 
-load_file (GtkSourceBuffer* buffer, gchar* path, gpointer user_data) 
+load_file (GtkSourceBuffer* buffer, gchar* path, XedFullSearchWindow *            window) 
 {
     GtkSourceFileLoader * file_loader;
     GtkSourceFile * src_file;
@@ -213,7 +213,7 @@ load_file (GtkSourceBuffer* buffer, gchar* path, gpointer user_data)
     g_object_unref (file);
 
     file_loader = gtk_source_file_loader_new (buffer, src_file);
-    gtk_source_file_loader_load_async (file_loader, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, (GAsyncReadyCallback) result_func, buffer);
+    gtk_source_file_loader_load_async (file_loader, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, (GAsyncReadyCallback) result_func, window);
 
 }
 
@@ -263,9 +263,34 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 		window->line_num = linenum;
 
 		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
-		load_file (window->source_buffer, value, NULL);
+		load_file (window->source_buffer, value, window);
 
     	g_free(value);
+
+    	/////
+
+		//gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 3, &start,  -1);
+		//gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 4, &end,  -1);
+
+    	/*
+	    GtkTextTagTable *tagtable;
+	    GtkTextTag *btag, *wtag;
+	    GtkTextIter start_iter, end_iter;
+
+	    gint start, end;
+	    start = 0;
+	    end = 10;
+
+		g_print ("aa %d %d %d \n", start, end, window->line_num);
+
+	    tagtable = gtk_text_buffer_get_tag_table(GTK_TEXT_BUFFER(window->source_buffer));
+	    btag = gtk_text_tag_table_lookup(tagtable, "black_bg");
+	    wtag = gtk_text_tag_table_lookup(tagtable, "white_fg");
+	    gtk_text_buffer_get_iter_at_line_index(GTK_TEXT_BUFFER(window->source_buffer), &start_iter, window->line_num-1, start);
+	    gtk_text_buffer_get_iter_at_line_index(GTK_TEXT_BUFFER(window->source_buffer), &end_iter, window->line_num-1, end);
+	    gtk_text_buffer_apply_tag(GTK_TEXT_BUFFER(window->source_buffer), btag, &start_iter, &end_iter);
+	    gtk_text_buffer_apply_tag(GTK_TEXT_BUFFER(window->source_buffer), wtag, &start_iter, &end_iter);
+		*/
 	}
 }
 
@@ -306,6 +331,11 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
 	
 	set_buffer_language (window->source_buffer, "c");
+
+	//gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "black_bg", "background", "red", NULL); 
+  	//gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "white_fg", "foreground", "yellow", NULL);
+
+	gtk_entry_grab_focus_without_selecting (GTK_ENTRY(window->entry));
 
 }
 
