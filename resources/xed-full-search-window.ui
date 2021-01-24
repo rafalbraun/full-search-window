@@ -23,6 +23,7 @@
             <row><col id="0" translatable="yes">*.java</col>     </row>
         </data>
    </object>
+   <object class="GtkAdjustment" id="vadjustment"></object>
    <template class="XedFullSearchWindow" parent="GtkDialog">
       <property name="default-width">1000</property>
       <property name="default-height">800</property>
@@ -233,6 +234,7 @@
                   </child>
                   <child>
                      <object class="GtkScrolledWindow" id="scrolled_window">
+                        <property name="vadjustment">vadjustment</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>

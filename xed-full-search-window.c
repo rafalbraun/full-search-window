@@ -25,6 +25,7 @@ struct _XedFullSearchWindow
 	GtkSourceBuffer *source_buffer;
 	GtkSourceView *source_view;
 	GtkWidget* scrolled_window;
+	GtkAdjustment* vadjustment;
 
 	gint line_num, start, end;
 	gchar* search_path;
@@ -52,6 +53,7 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, source_view);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, entry);
 	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, scrolled_window);
+	gtk_widget_class_bind_template_child (widget_class, XedFullSearchWindow, vadjustment);
 
 
 }
@@ -203,7 +205,6 @@ result_func (
 		GtkTextIter iter1, iter2;
 		gtk_text_buffer_get_iter_at_line_index (GTK_TEXT_BUFFER(window->source_buffer), &iter1, window->line_num-1, window->start);
 		gtk_text_buffer_get_iter_at_line_index (GTK_TEXT_BUFFER(window->source_buffer), &iter2, window->line_num-1, window->end);
-		//gtk_text_buffer_insert_with_tags_by_name(GTK_TEXT_BUFFER(window->source_buffer), &iter, "Colored Text\n", -1, "blue_fg", "lmarg",  NULL);
 		gtk_text_buffer_apply_tag_by_name (GTK_TEXT_BUFFER(window->source_buffer), "blue_fg", &iter1, &iter2);
 	}
 
@@ -284,30 +285,6 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 
     	g_free(value);
 
-    	/////
-
-
-    	/*
-	    GtkTextTagTable *tagtable;
-	    GtkTextTag *btag, *wtag;
-	    GtkTextIter start_iter, end_iter;
-
-	    gint start, end;
-	    start = 0;
-	    end = 10;
-
-		g_print ("aa %d %d %d \n", start, end, window->line_num);
-
-	    tagtable = gtk_text_buffer_get_tag_table(GTK_TEXT_BUFFER(window->source_buffer));
-	    btag = gtk_text_tag_table_lookup(tagtable, "black_bg");
-	    wtag = gtk_text_tag_table_lookup(tagtable, "white_fg");
-	    gtk_text_buffer_get_iter_at_line_index(GTK_TEXT_BUFFER(window->source_buffer), &start_iter, window->line_num-1, start);
-	    gtk_text_buffer_get_iter_at_line_index(GTK_TEXT_BUFFER(window->source_buffer), &end_iter, window->line_num-1, end);
-	    gtk_text_buffer_apply_tag(GTK_TEXT_BUFFER(window->source_buffer), btag, &start_iter, &end_iter);
-	    gtk_text_buffer_apply_tag(GTK_TEXT_BUFFER(window->source_buffer), wtag, &start_iter, &end_iter);
-		*/
-		
-
 	}
 }
 
@@ -333,6 +310,8 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 
 	gtk_widget_init_template (GTK_WIDGET (window));
 
+	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
+
 	g_signal_connect (window->entry, "changed",
 	                  G_CALLBACK (on_entry_key_press_event), window);
 
@@ -342,15 +321,10 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 	g_signal_connect (window->treeview, "row-activated", 
 					  G_CALLBACK(row_activated), window);
 
-  	GtkAdjustment* adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(window->scrolled_window));
-  	g_signal_connect(adjustment, "changed", G_CALLBACK(adjustment_changed), window);
-
-	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
+  	g_signal_connect (window->vadjustment, "changed", 
+  					  G_CALLBACK(adjustment_changed), window);
 	
 	set_buffer_language (window->source_buffer, "c");
-
-	//gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "black_bg", "background", "red", NULL); 
-  	//gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "white_fg", "foreground", "yellow", NULL);
 
   	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "blue_fg", 
       		"background", "red", NULL); 
