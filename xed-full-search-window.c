@@ -174,18 +174,28 @@ list_directory (char* dirname, const char* pattern, XedFullSearchWindow* window)
     closedir(dir);
 }
 
-static void
-on_entry_key_press_event (GtkWidget                  *entry,
-                          XedFullSearchWindow 	     *window)
+gboolean
+on_entry_key_press_event (GtkWidget *entry,
+               GdkEventKey  *event,
+               XedFullSearchWindow 	     *window)
 {
 	GtkEntry* e = GTK_ENTRY(entry);
 	guint16 len = gtk_entry_get_text_length (e);
 	const gchar *preedit = gtk_entry_get_text (e);
 
-	if (len >= 3) {
-		gtk_list_store_clear (window->liststore);
-		list_directory (window->search_path, preedit, window);
+	// MEGA MEGA WAŻNE
+	
+	gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
+	g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
+
+	if (event->keyval != GDK_KEY_BackSpace) {
+		if (len >= 3) {
+			gtk_list_store_clear (window->liststore);
+			list_directory (window->search_path, preedit, window);
+		}
 	}
+
+	return FALSE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,23 +279,31 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 
 	GtkTreeModel* model = GTK_TREE_MODEL(window->liststore);
 
-    if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
+	g_print ("aaa %d %d \n", widget == NULL, gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(widget)));
 
-		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
-		window->line_num = linenum;
+	/*
+	gint aaa = gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(widget));
+	g_print ("aaaaaaaaa %s \n", aaa);
 
-		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 3, &start,  -1);
-		window->start = start;
+	if (aaa > 0) {
+	    if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 
-		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 4, &end,  -1);
-		window->end = end;
+			gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
+			window->line_num = linenum;
 
-		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
-		load_file (window->source_buffer, value, window);
+			gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 3, &start,  -1);
+			window->start = start;
 
-    	g_free(value);
+			gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 4, &end,  -1);
+			window->end = end;
 
-	}
+			gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
+			load_file (window->source_buffer, value, window);
+
+	    	g_free(value);
+
+		}
+	}*/
 }
 
 static void
@@ -305,6 +323,13 @@ adjustment_changed (GtkAdjustment *adjustment,
 
 }
 
+/**
+w momencie gdy mamy wybrany row, a następnie dodajemy nowe w wyniku wyszukania, to selection ma nadal wybrany jakiś row i względem niego próbuje zupdateować bufor
+
+okazuje się, że GtkTreeSelection robi unselect_all dopiero jak pododaje wszystkie rows które ma do dodania -> czy możemy cokolwiek z tym zrobić?
+
+
+*/
 static void
 xed_full_search_window_init (XedFullSearchWindow *window) {
 
@@ -312,7 +337,7 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 
 	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
 
-	g_signal_connect (window->entry, "changed",
+	g_signal_connect (window->entry, "key-press-event",
 	                  G_CALLBACK (on_entry_key_press_event), window);
 
 	g_signal_connect (window->selection, "changed", 
