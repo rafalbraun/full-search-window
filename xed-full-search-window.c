@@ -69,7 +69,7 @@ add_to_list(GtkListStore *liststore, const char *occurrence, const char *line, g
 
   gtk_list_store_set(liststore, &iter, 0, occurrence, 1, line, 2, lnum, 3, start, 4, end, 5, filepath, -1);
 }
-
+/*
 static gchar* 
 extract_filename(const gchar* filepath) 
 {
@@ -84,7 +84,7 @@ extract_filename(const gchar* filepath)
 
   return filename;
 }
-
+*/
 static void 
 scan_file(char const* const filename, char const* const pattern, XedFullSearchWindow* window) {
     FILE* file = fopen(filename, "r");    /* should check the result */
@@ -106,7 +106,7 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
 
             g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
 
-            gchar* aaa = extract_filename (filename);
+            gchar* aaa = g_path_get_basename (filename);
             add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
 
             g_free (word);
@@ -217,6 +217,17 @@ load_file (GtkSourceBuffer* buffer, gchar* path, gpointer user_data)
 
 }
 
+static void set_buffer_language (GtkSourceBuffer* source_buffer, const char* lang_name) {
+    GtkSourceLanguageManager *manager;
+    GtkSourceLanguage *lang = NULL;
+
+    manager = gtk_source_language_manager_get_default ();
+    lang = gtk_source_language_manager_get_language (manager, lang_name);
+    
+    gtk_source_buffer_set_language (source_buffer, lang);
+    gtk_source_buffer_set_highlight_syntax (source_buffer, TRUE);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static void
@@ -247,7 +258,7 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 	GtkTreeModel* model = GTK_TREE_MODEL(window->liststore);
 
     if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
-    	
+
 		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
 		window->line_num = linenum;
 
@@ -293,6 +304,8 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
   	g_signal_connect(adjustment, "changed", G_CALLBACK(adjustment_changed), window);
 
 	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
+	
+	set_buffer_language (window->source_buffer, "c");
 
 }
 
