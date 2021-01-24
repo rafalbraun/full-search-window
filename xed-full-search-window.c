@@ -26,7 +26,7 @@ struct _XedFullSearchWindow
 	GtkSourceView *source_view;
 	GtkWidget* scrolled_window;
 
-	gint line_num;
+	gint line_num, start, end;
 	gchar* search_path;
 };
 
@@ -196,6 +196,14 @@ result_func (
 
     success = gtk_source_file_loader_load_finish (loader, res, NULL);
 
+    if (success) {
+		GtkTextIter iter1, iter2;
+		gtk_text_buffer_get_iter_at_line_index (GTK_TEXT_BUFFER(window->source_buffer), &iter1, window->line_num-1, window->start);
+		gtk_text_buffer_get_iter_at_line_index (GTK_TEXT_BUFFER(window->source_buffer), &iter2, window->line_num-1, window->end);
+		//gtk_text_buffer_insert_with_tags_by_name(GTK_TEXT_BUFFER(window->source_buffer), &iter, "Colored Text\n", -1, "blue_fg", "lmarg",  NULL);
+		gtk_text_buffer_apply_tag_by_name (GTK_TEXT_BUFFER(window->source_buffer), "blue_fg", &iter1, &iter2);
+	}
+
     g_return_if_fail (success);
 }
 
@@ -253,7 +261,7 @@ static void
 row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
     GtkTreeIter iter;
 	gchar *value;
-	gint linenum;
+	gint linenum, start, end;
 
 	GtkTreeModel* model = GTK_TREE_MODEL(window->liststore);
 
@@ -262,6 +270,12 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
 		window->line_num = linenum;
 
+		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 3, &start,  -1);
+		window->start = start;
+
+		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 4, &end,  -1);
+		window->end = end;
+
 		gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 5, &value,  -1);
 		load_file (window->source_buffer, value, window);
 
@@ -269,8 +283,6 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 
     	/////
 
-		//gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 3, &start,  -1);
-		//gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 4, &end,  -1);
 
     	/*
 	    GtkTextTagTable *tagtable;
@@ -291,6 +303,8 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 	    gtk_text_buffer_apply_tag(GTK_TEXT_BUFFER(window->source_buffer), btag, &start_iter, &end_iter);
 	    gtk_text_buffer_apply_tag(GTK_TEXT_BUFFER(window->source_buffer), wtag, &start_iter, &end_iter);
 		*/
+		
+
 	}
 }
 
@@ -334,6 +348,9 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 
 	//gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "black_bg", "background", "red", NULL); 
   	//gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "white_fg", "foreground", "yellow", NULL);
+
+  	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(window->source_buffer), "blue_fg", 
+      		"background", "red", NULL); 
 
 	gtk_entry_grab_focus_without_selecting (GTK_ENTRY(window->entry));
 
