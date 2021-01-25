@@ -111,7 +111,14 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
             gchar* aaa = g_path_get_basename (filename);
 
             if (!g_file_test (filename, G_FILE_TEST_IS_EXECUTABLE)) {
+
+        		//g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
+
+            	//gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
             	add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
+
+        		//g_print ("______ %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
+
             }
 
             g_free (word);
@@ -185,13 +192,16 @@ on_entry_key_press_event (GtkWidget *entry,
 
 	// MEGA MEGA WAŻNE
 	
-	gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
-	g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
+	//gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
+	//g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
 
 	if (event->keyval != GDK_KEY_BackSpace) {
 		if (len >= 3) {
+			// TODO
+			// tutaj usuwamy i dodajemy wiec pewnie to tutaj dac trzeba zapamietac -> unselect_all -> przywrocic
 			gtk_list_store_clear (window->liststore);
 			list_directory (window->search_path, preedit, window);
+
 		}
 	}
 
@@ -272,21 +282,31 @@ row_activated (GtkTreeView       *tree_view,
 }
 
 static void
-row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
+row_changed (GtkTreeSelection *widget/*, GdkEvent  *event*/,XedFullSearchWindow *window) {
     GtkTreeIter iter;
 	gchar *value;
 	gint linenum, start, end;
 
 	GtkTreeModel* model = GTK_TREE_MODEL(window->liststore);
 
-	g_print ("aaa %d %d \n", widget == NULL, gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(widget)));
+	//g_print ("aaa %d %d \n", widget == NULL, gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(widget)));
 
-	/*
-	gint aaa = gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(widget));
-	g_print ("aaaaaaaaa %s \n", aaa);
+	// TODO
+	// 1. zapamietujemy wybrany
+	// 2. robimy clear na liście
+	// 3. czyscimy bufor
+	// 4. wybieramy zapamietany wczesniej
+	// 5. ustawiamy nowa zawartosc bufora
+	// 
+	// ale po sprawdzeniu czy event to był klik usera (a nie add albo delete)
+	// 
 
-	if (aaa > 0) {
-	    if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
+	gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
+	gint aaa = gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection));
+	g_print ("aaaaaaaaa %d \n", aaa);
+
+	//if (aaa > 0) {
+	    if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(window->selection), &model, &iter)) {
 
 			gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
 			window->line_num = linenum;
@@ -303,7 +323,7 @@ row_changed (GtkTreeSelection *widget, XedFullSearchWindow *window) {
 	    	g_free(value);
 
 		}
-	}*/
+	//}
 }
 
 static void
@@ -328,8 +348,15 @@ w momencie gdy mamy wybrany row, a następnie dodajemy nowe w wyniku wyszukania,
 
 okazuje się, że GtkTreeSelection robi unselect_all dopiero jak pododaje wszystkie rows które ma do dodania -> czy możemy cokolwiek z tym zrobić?
 
+okej, jednak problem jest wtedy gdy rekordy są usuwane (robimy clear) , czyli przy każdym delete robi się select i jakiś wiersz jest zawsze wybrany ???
 
 */
+gboolean
+user_function (GtkTreeView *treeview,
+               gpointer     user_data){
+	g_print ("aaa \n");
+}
+
 static void
 xed_full_search_window_init (XedFullSearchWindow *window) {
 
@@ -340,11 +367,14 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 	g_signal_connect (window->entry, "key-press-event",
 	                  G_CALLBACK (on_entry_key_press_event), window);
 
-	g_signal_connect (window->selection, "changed", 
-					  G_CALLBACK(row_changed), window);
+	//g_signal_connect (window->selection, "changed", 
+	//				  G_CALLBACK(row_changed), window);
 
 	g_signal_connect (window->treeview, "row-activated", 
 					  G_CALLBACK(row_activated), window);
+
+	g_signal_connect (window->treeview, "cursor-changed", 
+					  G_CALLBACK(row_changed), window);
 
   	g_signal_connect (window->vadjustment, "changed", 
   					  G_CALLBACK(adjustment_changed), window);
