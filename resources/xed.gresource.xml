@@ -4,5 +4,6 @@
     <file>xed-highlight-mode-dialog.ui</file>
     <file>xed-highlight-mode-selector.ui</file>
     <file>xed-full-search-window.ui</file>
+    <file>xed-tree-view.ui</file>
   </gresource>
 </gresources>
