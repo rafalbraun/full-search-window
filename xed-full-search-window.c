@@ -27,7 +27,7 @@ struct _XedFullSearchWindow
 	GtkWidget* scrolled_window;
 	GtkAdjustment* vadjustment;
 
-	gint line_num, start, end;
+	gint line_num, start, end, flag;
 	gchar* search_path;
 };
 
@@ -71,22 +71,7 @@ add_to_list(GtkListStore *liststore, const char *occurrence, const char *line, g
 
   gtk_list_store_set(liststore, &iter, 0, occurrence, 1, line, 2, lnum, 3, start, 4, end, 5, filepath, -1);
 }
-/*
-static gchar* 
-extract_filename(const gchar* filepath) 
-{
-  gchar*  filename;
-  gchar** tokens;
-  int     tokennum;
 
-  tokens = g_strsplit(filepath, "/", -1);
-  tokennum = g_strv_length(tokens);
-  filename = g_strdup(tokens[tokennum-1]);
-  g_strfreev(tokens);
-
-  return filename;
-}
-*/
 static void 
 scan_file(char const* const filename, char const* const pattern, XedFullSearchWindow* window) {
     FILE* file = fopen(filename, "r");    /* should check the result */
@@ -195,14 +180,19 @@ on_entry_key_press_event (GtkWidget *entry,
 	//gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
 	//g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
 
-	if (event->keyval != GDK_KEY_BackSpace) {
-		if (len >= 3) {
-			// TODO
-			// tutaj usuwamy i dodajemy wiec pewnie to tutaj dac trzeba zapamietac -> unselect_all -> przywrocic
-			gtk_list_store_clear (window->liststore);
-			list_directory (window->search_path, preedit, window);
+	if (event->keyval == GDK_KEY_BackSpace) {
+		GtkTextIter start, end;
+		gtk_text_buffer_get_bounds (GTK_TEXT_BUFFER(window->source_buffer), &start, &end);
+		gtk_text_buffer_delete (GTK_TEXT_BUFFER(window->source_buffer), &start, &end);
+	}
 
-		}
+	if (len >= 3) {
+		// TODO
+		// tutaj usuwamy i dodajemy wiec pewnie to tutaj dac trzeba zapamietac -> unselect_all -> przywrocic
+		window->flag = 1;
+		gtk_list_store_clear (window->liststore);
+		list_directory (window->search_path, preedit, window);
+		window->flag = 0;
 	}
 
 	return FALSE;
@@ -301,11 +291,11 @@ row_changed (GtkTreeSelection *widget/*, GdkEvent  *event*/,XedFullSearchWindow 
 	// ale po sprawdzeniu czy event to był klik usera (a nie add albo delete)
 	// 
 
-	gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
-	gint aaa = gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection));
-	g_print ("aaaaaaaaa %d \n", aaa);
+	//gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
+	//gint aaa = gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection));
+	//g_print ("aaaaaaaaa %d \n", aaa);
 
-	//if (aaa > 0) {
+	if (window->flag == 0) {
 	    if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(window->selection), &model, &iter)) {
 
 			gtk_tree_model_get(GTK_TREE_MODEL (window->liststore), &iter, 2, &linenum,  -1);
@@ -323,7 +313,7 @@ row_changed (GtkTreeSelection *widget/*, GdkEvent  *event*/,XedFullSearchWindow 
 	    	g_free(value);
 
 		}
-	//}
+	}
 }
 
 static void
@@ -386,6 +376,7 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 
 	gtk_entry_grab_focus_without_selecting (GTK_ENTRY(window->entry));
 
+	window->flag = 0;
 }
 
 GtkWidget *
