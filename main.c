@@ -2,12 +2,13 @@
 #define GLIB_VERSION_MIN_REQUIRED       GLIB_VERSION_2_28
 
 #include <gtk/gtk.h>
-//#include "full_search.c"
 
 #include "xed-highlight-mode-selector.h"
 #include "xed-highlight-mode-dialog.h"
 #include "xed-full-search-window.h"
 #include "xed-tree-view.h"
+
+#define EXPANDED_ROWS_FILE "/home/rafal/IdeaProjects/gtksourceview-my-ide/application/opened_tabs.txt"
 
 int main(int argc, char *argv[]) {
 

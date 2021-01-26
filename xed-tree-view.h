@@ -15,9 +15,11 @@ G_DECLARE_FINAL_TYPE (XedTreeView, xed_tree_view, XED, TREE_VIEW, GtkTreeView)
 
 XedTreeView *xed_tree_view_new             ();
 
+void
+populate_tree_view(XedTreeView *treeview) ;
 
-
-
+void
+populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter toplevel, XedTreeView *treeview) ;
 
 
 
