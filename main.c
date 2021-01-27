@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   gtk_init(&argc, &argv);
 
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window), "Mnemonic");
+  gtk_window_set_title(GTK_WINDOW(window), "Treeview");
   gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
   gtk_container_set_border_width(GTK_CONTAINER(window), 15);
   

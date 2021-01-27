@@ -35,6 +35,8 @@ xed_tree_view_class_init (XedTreeViewClass *klass)
 	gtk_widget_class_set_template_from_resource (widget_class,
 	                                             "/org/x/editor/ui/xed-tree-view.ui");
 
+	gtk_widget_class_bind_template_child (widget_class, XedTreeView, treestore);
+
 }
 
 static void
@@ -45,8 +47,9 @@ xed_tree_view_init (XedTreeView *treeview)
 
 	gtk_widget_init_template (GTK_WIDGET (treeview));
 
-	treeview->filepath = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
-	//populate_tree_view (treeview);
+	treeview->filepath = "/home/rafal/IdeaProjects/gtksourceview-my-ide/application";
+	
+	populate_tree_view (treeview);
 
 }
 
@@ -59,17 +62,17 @@ xed_tree_view_new ()
 void
 populate_tree_view(XedTreeView *treeview) 
 {
-    GtkTreeStore    *treestore = NULL;
-    GtkTreePath     *treepath;
+    //GtkTreeStore    *treestore;
     GtkTreeIter      toplevel;
-    //GtkTreeView     *treeview;
     gchar           *pathname;
+    //GtkTreePath     *treepath;
+    //GtkTreeView     *treeview;
 
     pathname = treeview->filepath;
-    treestore = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
+    //treestore = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
 
-    gtk_tree_store_append(treestore, &toplevel, NULL);
-    gtk_tree_store_set(treestore, &toplevel, COLUMN, pathname, -1);
+    gtk_tree_store_append(treeview->treestore, &toplevel, NULL);
+    gtk_tree_store_set(treeview->treestore, &toplevel, COLUMN, pathname, -1);
 
     //load_expanded_rows_from_file (user_data);
     populate_tree_store(pathname, GTK_TREE_VIEW(treeview), toplevel, treeview);
@@ -152,19 +155,6 @@ populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter
         }
         if (entry->d_type == DT_REG) 
         {
-            // if file extension is '.lo' then omit file
-            /*
-            const char * extension = get_filename_ext (entry->d_name);
-            if (g_strcmp0(extension, "lo") == 0) {
-                continue;
-            }
-            if (g_strcmp0(extension, "o") == 0) {
-                continue;
-            }
-            if (g_strcmp0(extension, "") == 0) {
-                continue;
-            }*/
-
             gtk_tree_store_append(tree_store, &child, &toplevel);
             gtk_tree_store_set(tree_store, &child, COLUMN, entry->d_name, -1);
         }
