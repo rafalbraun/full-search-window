@@ -61,6 +61,36 @@ xed_tree_view_new ()
 	return g_object_new (XED_TYPE_TREE_VIEW, NULL);
 }
 
+gint
+sort_iter_compare_func (GtkTreeModel *model,
+                      GtkTreeIter  *a,
+                      GtkTreeIter  *b,
+                      gpointer      userdata)
+{
+	gint ret;
+    gchar *name1, *name2;
+
+    gtk_tree_model_get(model, a, COLUMN, &name1, -1);
+    gtk_tree_model_get(model, b, COLUMN, &name2, -1);
+
+    if (name1 == NULL || name2 == NULL)
+    {
+      if (name1 == NULL && name2 == NULL)
+        return 0; /* both equal => ret = 0 */
+
+      ret = (name1 == NULL) ? -1 : 1;
+    }
+    else
+    {
+      ret = g_utf8_collate(name1,name2);
+    }
+
+    g_free(name1);
+    g_free(name2);
+
+    return ret;
+}
+
 void
 populate_tree_view(XedTreeView *window) 
 {
@@ -83,6 +113,22 @@ populate_tree_view(XedTreeView *window)
 
     //g_signal_connect (G_OBJECT (treeview), "key-press-event", G_CALLBACK (key_pressed_treeview), user_data);
     //g_signal_connect (G_OBJECT (treeview), "button-press-event", G_CALLBACK (on_button_pressed), user_data);
+
+	gtk_tree_view_expand_all (treeview);
+
+
+
+
+    GtkTreeSortable *sortable;
+	//GtkTreeModel  *liststore = NULL;
+    
+    //liststore = window->treestore;
+    sortable = GTK_TREE_SORTABLE(window->treestore);
+    gtk_tree_sortable_set_sort_func(sortable, COLUMN, sort_iter_compare_func,
+                                    NULL, NULL);
+    gtk_tree_sortable_set_sort_column_id(sortable, COLUMN, GTK_SORT_ASCENDING);
+
+
 
 }
 
