@@ -13,7 +13,7 @@ struct _XedTreeView
 {
 	GtkScrolledWindow parent_instance;
 
-	GtkTreeView * treeview;
+	GtkTreeView     * treeview;
 	GtkTreeStore    * treestore;
 
 	GList* expanded_rows_list;
@@ -61,6 +61,7 @@ xed_tree_view_new ()
 	return g_object_new (XED_TYPE_TREE_VIEW, NULL);
 }
 
+// http://scentric.net/tutorial/sec-sorting.html
 gint
 sort_iter_compare_func (GtkTreeModel *model,
                       GtkTreeIter  *a,
@@ -91,66 +92,179 @@ sort_iter_compare_func (GtkTreeModel *model,
     return ret;
 }
 
+gboolean
+key_pressed_treeview(GtkWidget *treeview, GdkEventKey *event, XedTreeView *window) 
+{
+    GtkTreeModel     *tree_model;
+    GtkTreeSelection *selection;
+    GtkTreePath      *treepath;
+    GtkTreeIter       parent;
+    GList            *rows;
+
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+
+    if (gtk_tree_selection_count_selected_rows (selection) == 1) 
+    {
+        if (event->keyval == GDK_KEY_Return) 
+        {
+            tree_model = gtk_tree_view_get_model (GTK_TREE_VIEW(treeview));
+            gtk_tree_selection_get_selected (selection, &tree_model, &parent);
+
+            if (gtk_tree_model_iter_has_child (tree_model, &parent)) 
+            {
+                gtk_tree_selection_select_path (selection, treepath);
+                rows = gtk_tree_selection_get_selected_rows (selection, &tree_model);
+                treepath = (GtkTreePath*) g_list_first (rows)->data;
+
+                if (gtk_tree_view_row_expanded (GTK_TREE_VIEW(treeview), treepath)) 
+                {
+                    gtk_tree_view_collapse_row (GTK_TREE_VIEW(treeview), treepath);
+                } else 
+                {
+                    gtk_tree_view_expand_row (GTK_TREE_VIEW(treeview), treepath, FALSE);
+                }
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+gchar* translate_gtk_iter_to_string (GtkTreeModel *model, GtkTreeIter* iter) 
+{
+    GtkTreeIter       child, parent;
+    gboolean          hasParent;
+    gchar            *name, *parent_name, *path;
+
+    parent_name = "";
+    path = "";
+    child = *iter;
+
+    gtk_tree_model_get (model, &child, COLUMN, &name, -1);
+
+    while ( (hasParent = gtk_tree_model_iter_parent(model, &parent, &child)) == TRUE ) 
+    {
+        if ( hasParent == TRUE ) 
+        {
+            gtk_tree_model_get (model, &parent, COLUMN, &parent_name, -1);
+            path = g_strconcat(parent_name, "/", path, NULL);
+            g_free(parent_name);
+            child = parent;
+        }
+    }
+
+    path = g_strconcat(path, name, NULL);
+
+    g_free(name);
+
+    return path;    
+}
+
+void validate_file(GtkTreeModel *model, GtkTreeSelection *selection, XedTreeView *window)
+{
+    GtkTreeIter child;
+    gchar* path;
+
+    gtk_tree_selection_get_selected(selection, &model, &child);
+    path = translate_gtk_iter_to_string(model, &child);
+    g_print("%s \n", path);
+	
+	g_free(path);
+}
+
+void
+popup_menu(GtkWidget *treeview, GdkEventButton *event, XedTreeView *window) 
+{
+
+}
+
+gboolean
+on_button_pressed(GtkWidget *treeview, GdkEventButton *event, XedTreeView *window) 
+{
+    GtkTreeSelection *selection;
+    GtkTreeModel     *model;
+    GtkTreeIter       child;
+    gchar            *path;
+
+    path = "";
+
+    if (event->type == GDK_2BUTTON_PRESS) 
+    {
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+
+        if (gtk_tree_selection_count_selected_rows(selection) == 1) 
+        {
+
+            model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+
+            validate_file (model, selection, window);
+
+            //g_free(path);
+        }
+
+        return TRUE;
+    } else if (event->type == GDK_BUTTON_PRESS && event->button == 3) 
+    {
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+        if (gtk_tree_selection_count_selected_rows(selection) <= 1) 
+        {
+            GtkTreePath * path;
+
+            if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(treeview), event->x, event->y, &path, NULL, NULL, NULL)) 
+            {
+                gtk_tree_selection_unselect_all(selection);
+                gtk_tree_selection_select_path(selection, path);
+                gtk_tree_path_free(path);
+            }
+        }
+        popup_menu(treeview, event, window);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 void
 populate_tree_view(XedTreeView *window) 
 {
-    //GtkTreeStore    *treestore;
     GtkTreeIter      toplevel;
-    gchar           *pathname;
-    //GtkTreePath     *treepath;
     GtkTreeView     *treeview;
+    gchar           *pathname;
 
     pathname = window->filepath;
-    //treestore = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
-
     treeview = window->treeview;
 
     gtk_tree_store_append(window->treestore, &toplevel, NULL);
     gtk_tree_store_set(window->treestore, &toplevel, COLUMN, pathname, -1);
 
-    //load_expanded_rows_from_file (user_data);
     populate_tree_store(pathname, GTK_TREE_VIEW(treeview), toplevel, window);
 
-    //g_signal_connect (G_OBJECT (treeview), "key-press-event", G_CALLBACK (key_pressed_treeview), user_data);
-    //g_signal_connect (G_OBJECT (treeview), "button-press-event", G_CALLBACK (on_button_pressed), user_data);
+    g_signal_connect (G_OBJECT (treeview), "key-press-event", G_CALLBACK (key_pressed_treeview), window);
+    g_signal_connect (G_OBJECT (treeview), "button-press-event", G_CALLBACK (on_button_pressed), window);
 
 	gtk_tree_view_expand_all (treeview);
 
 
 
-
-    GtkTreeSortable *sortable;
-	//GtkTreeModel  *liststore = NULL;
-    
-    //liststore = window->treestore;
-    sortable = GTK_TREE_SORTABLE(window->treestore);
+    GtkTreeSortable *sortable = GTK_TREE_SORTABLE(window->treestore);
     gtk_tree_sortable_set_sort_func(sortable, COLUMN, sort_iter_compare_func,
                                     NULL, NULL);
     gtk_tree_sortable_set_sort_column_id(sortable, COLUMN, GTK_SORT_ASCENDING);
 
-
-
-}
-
-int cmpfunc (const void *a, const void *b) 
-{
-    return g_strcmp0(((struct dirent *)a)->d_name, ((struct dirent *)b)->d_name);
 }
 
 void
 populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter toplevel, XedTreeView *treeview) 
 {
     DIR             *dir;
-    GtkTreeIter      child;
     gchar            path[SIZE];
     struct dirent   *entry;
 
-    GtkTreeModel *tree_model = gtk_tree_view_get_model(tree_view);
-    GtkTreeStore *tree_store = GTK_TREE_STORE(tree_model);
+    GtkTreeIter      child;
+    GtkTreeModel 	*tree_model = gtk_tree_view_get_model(tree_view);
+    GtkTreeStore 	*tree_store = GTK_TREE_STORE(tree_model);
 
     if (!(dir = opendir(filepath))) 
     {
-	    closedir(dir);
         return;
     }
 
@@ -166,82 +280,12 @@ populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter
         	{
         		populate_tree_store(path, GTK_TREE_VIEW(tree_view), child, treeview);
         	}
+        	else if (entry->d_type == DT_REG) 
+        	{
+        		// nothing
+        	}
         }
     }
 
     closedir(dir);
-
-	/*
-    DIR             *dir;
-    GtkTreeIter      child;
-    struct dirent   *entry;
-    struct dirent   *entries;
-    int              count = 0, i = 0;
-    gchar            path[SIZE];
-
-    GtkTreeModel *tree_model = gtk_tree_view_get_model(tree_view);
-    GtkTreeStore *tree_store = GTK_TREE_STORE(tree_model);
-
-    if (!(dir = opendir(filepath))) 
-    {
-        return;
-    }
-
-    while ((entry = readdir(dir)) != NULL)
-    {
-        //if (entry->d_type == DT_REG) { // If the entry is a regular file 
-            count++;
-        //}
-    }
-    closedir(dir);
-
-    dir = opendir(filepath); // There should be error handling after this 
-    entries = g_new0 (struct dirent, count);
-
-    while ((entry = readdir(dir)) != NULL) 
-    {
-        // HERE ADD FILTER FUNCTION
-        if ( (strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0) && (entry->d_name[0] != '.') ) 
-        {
-            entries[i++] = *entry;
-        }
-    }
-    qsort (entries, count, sizeof(struct dirent), cmpfunc);
-
-    for (int i=0; i<count; i++) 
-    {
-        entry = &(entries[i]);
-        if (entry->d_type == DT_DIR) 
-        {
-            snprintf(path, sizeof(path), "%s/%s", filepath, entry->d_name);
-            gtk_tree_store_append(tree_store, &child, &toplevel);
-            gtk_tree_store_set(tree_store, &child, COLUMN, entry->d_name, -1);
-            populate_tree_store(path, GTK_TREE_VIEW(tree_view), child, treeview);
-
-            GList * expanded_rows_list = treeview->expanded_rows_list;
-
-            guint len = g_list_length(expanded_rows_list);
-            if (len == 0) 
-            {
-                break;
-            }
-            for (int i=0; i<len; i++) 
-            {
-                gchar* element = g_list_nth_data(expanded_rows_list, i);
-                if (strcmp(element, path) == 0) 
-                {
-                    GtkTreePath* tree_path = gtk_tree_model_get_path (tree_model, &child);
-                    gtk_tree_view_expand_to_path (tree_view, tree_path);
-                }
-            }
-        }
-        if (entry->d_type == DT_REG) 
-        {
-            gtk_tree_store_append(tree_store, &child, &toplevel);
-            gtk_tree_store_set(tree_store, &child, COLUMN, entry->d_name, -1);
-        }
-    }
-
-    g_free (entries);
-    closedir(dir);*/
 }
