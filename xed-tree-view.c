@@ -92,6 +92,38 @@ populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter
 {
     DIR             *dir;
     GtkTreeIter      child;
+    gchar            path[SIZE];
+    struct dirent   *entry;
+
+    GtkTreeModel *tree_model = gtk_tree_view_get_model(tree_view);
+    GtkTreeStore *tree_store = GTK_TREE_STORE(tree_model);
+
+    if (!(dir = opendir(filepath))) 
+    {
+	    closedir(dir);
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) 
+    {
+        if ( (strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0) && (entry->d_name[0] != '.') ) 
+        {
+            snprintf(path, sizeof(path), "%s/%s", filepath, entry->d_name);
+            gtk_tree_store_append(tree_store, &child, &toplevel);
+            gtk_tree_store_set(tree_store, &child, COLUMN, entry->d_name, -1);
+
+        	if (entry->d_type == DT_DIR) 
+        	{
+        		populate_tree_store(path, GTK_TREE_VIEW(tree_view), child, treeview);
+        	}
+        }
+    }
+
+    closedir(dir);
+
+	/*
+    DIR             *dir;
+    GtkTreeIter      child;
     struct dirent   *entry;
     struct dirent   *entries;
     int              count = 0, i = 0;
@@ -107,13 +139,13 @@ populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter
 
     while ((entry = readdir(dir)) != NULL)
     {
-        //if (entry->d_type == DT_REG) { /* If the entry is a regular file */
+        //if (entry->d_type == DT_REG) { // If the entry is a regular file 
             count++;
         //}
     }
     closedir(dir);
 
-    dir = opendir(filepath); /* There should be error handling after this */
+    dir = opendir(filepath); // There should be error handling after this 
     entries = g_new0 (struct dirent, count);
 
     while ((entry = readdir(dir)) != NULL) 
@@ -161,5 +193,5 @@ populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter
     }
 
     g_free (entries);
-    closedir(dir);
+    closedir(dir);*/
 }
