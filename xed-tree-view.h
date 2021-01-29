@@ -11,7 +11,7 @@ G_BEGIN_DECLS
 
 #define XED_TYPE_TREE_VIEW (xed_tree_view_get_type ())
 
-G_DECLARE_FINAL_TYPE (XedTreeView, xed_tree_view, XED, TREE_VIEW, GtkTreeView)
+G_DECLARE_FINAL_TYPE (XedTreeView, xed_tree_view, XED, TREE_VIEW, GtkScrolledWindow)
 
 XedTreeView *xed_tree_view_new             ();
 

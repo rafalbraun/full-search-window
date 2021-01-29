@@ -11,8 +11,9 @@
 
 struct _XedTreeView
 {
-	GtkTreeView parent_instance;
+	GtkScrolledWindow parent_instance;
 
+	GtkTreeView * treeview;
 	GtkTreeStore    * treestore;
 
 	GList* expanded_rows_list;
@@ -24,7 +25,7 @@ enum {
     NUM_COLS
 };
 
-G_DEFINE_TYPE (XedTreeView, xed_tree_view, GTK_TYPE_TREE_VIEW)
+G_DEFINE_TYPE (XedTreeView, xed_tree_view, GTK_TYPE_SCROLLED_WINDOW)
 
 static void
 xed_tree_view_class_init (XedTreeViewClass *klass)
@@ -35,6 +36,7 @@ xed_tree_view_class_init (XedTreeViewClass *klass)
 	gtk_widget_class_set_template_from_resource (widget_class,
 	                                             "/org/x/editor/ui/xed-tree-view.ui");
 
+	gtk_widget_class_bind_template_child (widget_class, XedTreeView, treeview);
 	gtk_widget_class_bind_template_child (widget_class, XedTreeView, treestore);
 
 }
@@ -60,22 +62,24 @@ xed_tree_view_new ()
 }
 
 void
-populate_tree_view(XedTreeView *treeview) 
+populate_tree_view(XedTreeView *window) 
 {
     //GtkTreeStore    *treestore;
     GtkTreeIter      toplevel;
     gchar           *pathname;
     //GtkTreePath     *treepath;
-    //GtkTreeView     *treeview;
+    GtkTreeView     *treeview;
 
-    pathname = treeview->filepath;
+    pathname = window->filepath;
     //treestore = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
 
-    gtk_tree_store_append(treeview->treestore, &toplevel, NULL);
-    gtk_tree_store_set(treeview->treestore, &toplevel, COLUMN, pathname, -1);
+    treeview = window->treeview;
+
+    gtk_tree_store_append(window->treestore, &toplevel, NULL);
+    gtk_tree_store_set(window->treestore, &toplevel, COLUMN, pathname, -1);
 
     //load_expanded_rows_from_file (user_data);
-    populate_tree_store(pathname, GTK_TREE_VIEW(treeview), toplevel, treeview);
+    populate_tree_store(pathname, GTK_TREE_VIEW(treeview), toplevel, window);
 
     //g_signal_connect (G_OBJECT (treeview), "key-press-event", G_CALLBACK (key_pressed_treeview), user_data);
     //g_signal_connect (G_OBJECT (treeview), "button-press-event", G_CALLBACK (on_button_pressed), user_data);
