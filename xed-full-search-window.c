@@ -1,6 +1,7 @@
 #define GLIB_VERSION_2_28               (G_ENCODE_VERSION (2, 28))
 #define GLIB_VERSION_MIN_REQUIRED       GLIB_VERSION_2_28
 
+#include "scan_file.c"
 #include "xed-full-search-window.h"
 
 #include <glib.h>
@@ -60,7 +61,6 @@ xed_full_search_window_class_init (XedFullSearchWindowClass *klass)
 
 /////////////////////////////////////////////////////////////////
 
-#define BUFFER  500
 
 static void 
 add_to_list(GtkListStore *liststore, const char *occurrence, const char *line, gint lnum, gint start, gint end, const gchar* filepath) 
@@ -70,54 +70,6 @@ add_to_list(GtkListStore *liststore, const char *occurrence, const char *line, g
   gtk_list_store_append(liststore, &iter);
 
   gtk_list_store_set(liststore, &iter, 0, occurrence, 1, line, 2, lnum, 3, start, 4, end, 5, filepath, -1);
-}
-
-static void 
-scan_file(char const* const filename, char const* const pattern, XedFullSearchWindow* window) {
-    FILE* file = fopen(filename, "r");    /* should check the result */
-    int linenum = 0;
-    char line[BUFFER];
-    GMatchInfo *match_info = NULL;
-    gint match_num, start_pos, end_pos;
-    GRegex *regex;
-    GError *err = NULL;
-
-    regex = g_regex_new (pattern, 0, 0, &err);
-
-    while (fgets(line, sizeof(line), file)) {
-
-        g_regex_match (regex, line, 0, &match_info);
-        while (g_match_info_matches (match_info))
-        {
-            gchar *word = g_match_info_fetch (match_info, 0);
-
-            g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
-
-            gchar* aaa = g_path_get_basename (filename);
-
-            if (!g_file_test (filename, G_FILE_TEST_IS_EXECUTABLE)) {
-
-        		//g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
-
-            	//gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
-            	add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
-
-        		//g_print ("______ %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
-
-            }
-
-            g_free (word);
-            g_match_info_next (match_info, NULL);
-        }
-        g_match_info_free (match_info);
-        linenum++;
-    }
-
-    /* may check feof here to make a difference between eof and io failure -- network
-       timeout for instance */
-
-    g_regex_unref (regex);
-    fclose(file);
 }
 
 static gboolean

@@ -4,3 +4,4 @@ a.out
 test_treeview
 test_search
 *.o
+test_scan
