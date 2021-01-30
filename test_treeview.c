@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
   g_signal_connect (G_OBJECT (treeview->treeview), "button-press-event", 
       G_CALLBACK (on_button_pressed), window);
   
-  g_signal_connect (G_OBJECT (treeview), "key-press-event", 
+  g_signal_connect (G_OBJECT (treeview->treeview), "key-press-event", 
       G_CALLBACK (key_pressed_treeview), window);
 
 

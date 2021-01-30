@@ -2,4 +2,5 @@ full_search
 glib_regex
 a.out
 test_treeview
+test_search
 *.o

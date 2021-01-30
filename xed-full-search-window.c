@@ -180,11 +180,16 @@ on_entry_key_press_event (GtkWidget *entry,
 	//gtk_tree_selection_unselect_all (GTK_TREE_SELECTION(window->selection));
 	//g_print ("ffffff %d \n", gtk_tree_selection_count_selected_rows (GTK_TREE_SELECTION(window->selection)));
 
+	g_print ("[INFO] %s \n", preedit);
+
+	/*
+	TODO : naprawić
+
 	if (event->keyval == GDK_KEY_BackSpace) {
 		GtkTextIter start, end;
 		gtk_text_buffer_get_bounds (GTK_TEXT_BUFFER(window->source_buffer), &start, &end);
 		gtk_text_buffer_delete (GTK_TEXT_BUFFER(window->source_buffer), &start, &end);
-	}
+	}*/
 
 	if (len >= 3) {
 		// TODO
@@ -352,7 +357,7 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 
 	gtk_widget_init_template (GTK_WIDGET (window));
 
-	window->search_path = "/home/rafal/IdeaProjects/gtksourceview-my-ide/full_search_folder";
+	window->search_path = "/home/rafal/IdeaProjects/xed";
 
 	g_signal_connect (window->entry, "key-press-event",
 	                  G_CALLBACK (on_entry_key_press_event), window);
