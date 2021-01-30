@@ -2,8 +2,15 @@ CC=gcc
 GTK=`pkg-config --cflags --libs gtk+-3.0 gtksourceview-4`
 GLIB=`pkg-config --libs --cflags glib-2.0`
 GLIB_COMPILE_RESOURCES = /usr/local/bin/glib-compile-resources
+COMPONENTS=xed-resources.c xed-highlight-mode-dialog.o xed-highlight-mode-selector.o xed-full-search-window.o xed-tree-view.o
 
-all: a.out
+all: a.out test_treeview
+
+a.out: main.c $(COMPONENTS)
+	$(CC) $(GLIB) main.c $(COMPONENTS) $(GTK) -o a.out
+
+test_treeview: test_treeview.c $(COMPONENTS)
+	$(CC) $(GLIB) test_treeview.c $(COMPONENTS) $(GTK) -o test_treeview
 
 a.out: main.c xed-resources.c xed-highlight-mode-dialog.o xed-highlight-mode-selector.o xed-full-search-window.o xed-tree-view.o
 	$(CC) $(GLIB) main.c xed-resources.c xed-highlight-mode-dialog.o xed-highlight-mode-selector.o xed-full-search-window.o xed-tree-view.o $(GTK) -o a.out
@@ -27,7 +34,7 @@ xed-resources.c: ./resources/xed.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES)
 	$(GLIB_COMPILE_RESOURCES) --target=xed-resources.c --sourcedir=./resources --generate-source ./resources/xed.gresource.xml
 
 clean:
-	rm a.out xed-resources.c *.o
+	rm a.out xed-resources.c *.o test_treeview
 
 
 
