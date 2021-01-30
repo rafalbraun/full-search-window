@@ -12,9 +12,6 @@ a.out: main.c $(COMPONENTS)
 test_treeview: test_treeview.c $(COMPONENTS)
 	$(CC) $(GLIB) test_treeview.c $(COMPONENTS) $(GTK) -o test_treeview
 
-a.out: main.c xed-resources.c xed-highlight-mode-dialog.o xed-highlight-mode-selector.o xed-full-search-window.o xed-tree-view.o
-	$(CC) $(GLIB) main.c xed-resources.c xed-highlight-mode-dialog.o xed-highlight-mode-selector.o xed-full-search-window.o xed-tree-view.o $(GTK) -o a.out
-
 full_search.o: full_search.c
 	$(CC) -c $(GLIB) full_search.c $(GTK) -o full_search.o
 

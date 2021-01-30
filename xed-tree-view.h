@@ -21,6 +21,33 @@ populate_tree_view(XedTreeView *treeview) ;
 void
 populate_tree_store(const gchar * filepath, GtkTreeView * tree_view, GtkTreeIter toplevel, XedTreeView *treeview) ;
 
+gboolean
+on_button_pressed(GtkWidget *treeview, GdkEventButton *event, XedTreeView *window);
+
+gboolean
+key_pressed_treeview(GtkWidget *treeview, GdkEventKey *event, XedTreeView *window);
+
+typedef enum pm {
+	COLLAPSE,
+	EXPAND
+} PopupMenu;
+
+enum {
+    COLUMN = 0,
+    NUM_COLS
+};
+
+
+struct _XedTreeView
+{
+	GtkScrolledWindow parent_instance;
+
+	GtkTreeView     * treeview;
+	GtkTreeStore    * treestore;
+
+	GList* expanded_rows_list;
+	gchar* filepath;
+};
 
 
 G_END_DECLS

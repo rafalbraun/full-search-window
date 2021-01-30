@@ -10,10 +10,11 @@
 
 #define EXPANDED_ROWS_FILE "/home/rafal/IdeaProjects/gtksourceview-my-ide/application/opened_tabs.txt"
 
-int main(int argc, char *argv[]) {
+int main (int argc, char *argv[]) 
+{
 
   GtkWidget *window;
-  GtkWidget *text_view;
+  XedTreeView *treeview;
 
   gtk_init(&argc, &argv);
 
@@ -22,16 +23,23 @@ int main(int argc, char *argv[]) {
   gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
   gtk_container_set_border_width(GTK_CONTAINER(window), 15);
   
-  text_view = GTK_WIDGET(xed_tree_view_new ());
+  treeview = xed_tree_view_new ();
   
-  gtk_container_add(GTK_CONTAINER(window), text_view);  
+  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(treeview));  
 
-  gtk_widget_show_all(window);
+  gtk_widget_show_all(GTK_WIDGET(window));
   
-  g_signal_connect(G_OBJECT(window), "destroy",
+  g_signal_connect (G_OBJECT(window), "destroy",
       G_CALLBACK(gtk_main_quit), NULL); 
+  
+  g_signal_connect (G_OBJECT (treeview->treeview), "button-press-event", 
+      G_CALLBACK (on_button_pressed), window);
+  
+  g_signal_connect (G_OBJECT (treeview), "key-press-event", 
+      G_CALLBACK (key_pressed_treeview), window);
+
 
   gtk_main();
-
+  
   return 0;
 }

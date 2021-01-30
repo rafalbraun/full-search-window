@@ -9,22 +9,6 @@
 
 #define SIZE 1000
 
-struct _XedTreeView
-{
-	GtkScrolledWindow parent_instance;
-
-	GtkTreeView     * treeview;
-	GtkTreeStore    * treestore;
-
-	GList* expanded_rows_list;
-	gchar* filepath;
-};
-
-enum {
-    COLUMN = 0,
-    NUM_COLS
-};
-
 G_DEFINE_TYPE (XedTreeView, xed_tree_view, GTK_TYPE_SCROLLED_WINDOW)
 
 static void
@@ -91,11 +75,6 @@ sort_iter_compare_func (GtkTreeModel *model,
 
     return ret;
 }
-
-typedef enum pm {
-	COLLAPSE,
-	EXPAND
-} PopupMenu;
 
 static GtkActionEntry buffer_action_entries[] = {
     //{ "New", "document-open", "_Open", "<control>O", "Open a file", G_CALLBACK (create_empty_tab) },
@@ -328,8 +307,8 @@ populate_tree_view(XedTreeView *window)
 
     populate_tree_store(pathname, GTK_TREE_VIEW(treeview), toplevel, window);
 
-    g_signal_connect (G_OBJECT (treeview), "key-press-event", G_CALLBACK (key_pressed_treeview), window);
-    g_signal_connect (G_OBJECT (treeview), "button-press-event", G_CALLBACK (on_button_pressed), window);
+    //g_signal_connect (G_OBJECT (treeview), "key-press-event", G_CALLBACK (key_pressed_treeview), window);
+    //g_signal_connect (G_OBJECT (treeview), "button-press-event", G_CALLBACK (on_button_pressed), window);
 
 	gtk_tree_view_expand_all (treeview);
 
