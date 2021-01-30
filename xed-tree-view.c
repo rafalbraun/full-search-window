@@ -92,6 +92,30 @@ sort_iter_compare_func (GtkTreeModel *model,
     return ret;
 }
 
+typedef enum pm {
+	COLLAPSE,
+	EXPAND
+} PopupMenu;
+
+static GtkActionEntry buffer_action_entries[] = {
+    //{ "New", "document-open", "_Open", "<control>O", "Open a file", G_CALLBACK (create_empty_tab) },
+    
+    
+    //{ "Collapse", "document-open", "_Open", "<control>O", "Open a file", G_CALLBACK (open_file_cb) },
+    //{ "Varnames", "document-open", "_Open", "<control>O", "Open a file", G_CALLBACK (underline_varnames) },
+    /*
+    { "Copy", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Paste", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Filter", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Mark", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Rename", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Delete", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Show", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    { "Open", "document-open", "_Open", "<control>O", "Open a file", NULL },
+    */
+    { "Quit", "document-open", "_Quit", "<control>Q", "Exit the application", G_CALLBACK (gtk_main_quit) }
+};
+
 gboolean
 key_pressed_treeview(GtkWidget *treeview, GdkEventKey *event, XedTreeView *window) 
 {
@@ -172,11 +196,77 @@ void validate_file(GtkTreeModel *model, GtkTreeSelection *selection, XedTreeView
 	g_free(path);
 }
 
+GtkWidget*
+build_menu (PopupMenu menuType, XedTreeView *window) 
+{
+    GtkWidget *menu;
+    GtkWidget *menuItem;
+    GtkActionEntry *actionEntry;
+
+    menu = gtk_menu_new();
+
+    // name, 
+    // callback, 
+    // accelerator, 
+    // stock_id, 
+    // callback, 
+    // label, 
+    // tooltip
+    for (int i=0; i<G_N_ELEMENTS (buffer_action_entries); i++) {
+        actionEntry = &(buffer_action_entries[i]);
+        menuItem = gtk_menu_item_new_with_label(actionEntry->name);
+        gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+        g_signal_connect (G_OBJECT(menuItem), "activate", G_CALLBACK (actionEntry->callback), window);
+    }
+    
+    gtk_widget_show_all(menu);
+
+    return menu;
+}
+
 void
 popup_menu(GtkWidget *treeview, GdkEventButton *event, XedTreeView *window) 
 {
+    GtkTreeModel     *tree_model;
+    GtkTreeSelection *selection;
+    GtkTreePath      *treepath;
+    GtkTreeIter       parent;
+    GList            *rows;
+    GtkWidget        *menu;
 
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+
+    if (gtk_tree_selection_count_selected_rows (selection) == 1) 
+    {
+        tree_model = gtk_tree_view_get_model (GTK_TREE_VIEW(treeview));
+        gtk_tree_selection_get_selected (selection, &tree_model, &parent);
+
+        if (gtk_tree_model_iter_has_child (tree_model, &parent)) 
+        {
+            gtk_tree_selection_select_path (selection, treepath);
+            rows = gtk_tree_selection_get_selected_rows (selection, &tree_model);
+            treepath = (GtkTreePath*) g_list_first (rows)->data;
+
+            if (gtk_tree_view_row_expanded (GTK_TREE_VIEW(treeview), treepath)) 
+            {
+                //menu = get_treeview_menu_collapse(userdata); OD ODKOMENTOWANIA
+                menu = build_menu(COLLAPSE, window);
+            } else 
+            {
+                //menu = get_treeview_menu_expand(userdata); OD ODKOMENTOWANIA
+                menu = build_menu(COLLAPSE, window);
+            }
+        } else 
+        {
+            //menu = get_treeview_menu(userdata); OD ODKOMENTOWANIA
+            menu = build_menu(COLLAPSE, window);
+        }
+    }
+
+    gtk_widget_show_all(GTK_WIDGET(menu));
+    gtk_menu_popup_at_pointer(GTK_MENU(menu), (GdkEvent * ) event);
 }
+
 
 gboolean
 on_button_pressed(GtkWidget *treeview, GdkEventButton *event, XedTreeView *window) 
