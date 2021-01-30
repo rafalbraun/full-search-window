@@ -17,7 +17,7 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
     	g_print ("[WARN] g_regex_new error \n");
     	return;
     }
-    
+
     while (fgets(line, sizeof(line), file)) {
 
         g_regex_match (regex, line, 0, &match_info);
@@ -39,6 +39,8 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
             if (!g_file_test (filename, G_FILE_TEST_IS_EXECUTABLE)) {
 
             	//add_to_list (window->liststore, line, aaa, linenum+1, start_pos, end_pos, filename);
+
+                g_print ("%d [%d-%d] \t::%s" , linenum+1, start_pos, end_pos, line);
 
             }
 
