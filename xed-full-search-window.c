@@ -158,7 +158,10 @@ list_directory (char* dirname, const char* pattern, XedFullSearchWindow* window)
 	        }
 	        if (dp->d_type == DT_REG) {
 				//g_print ("DT_REG %s \n", path);
-				scan_file (path, pattern, window);
+				int len = strlen(path);
+				if (path[len-2]=='.' && (path[len-1]=='h' || path[len-1]=='c'))   {
+					scan_file (path, pattern, window);
+				}
 	        }
         }
     }
