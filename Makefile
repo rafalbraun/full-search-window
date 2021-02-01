@@ -1,6 +1,7 @@
 CC=gcc
 GTK=`pkg-config --cflags --libs gtk+-3.0 gtksourceview-4`
 GLIB=`pkg-config --libs --cflags glib-2.0`
+PCRE=`pkg-config --cflags --libs libpcre` 
 GLIB_COMPILE_RESOURCES = /usr/local/bin/glib-compile-resources
 COMPONENTS=xed-resources.c xed-highlight-mode-dialog.o xed-highlight-mode-selector.o xed-full-search-window.o xed-tree-view.o 
 
@@ -36,8 +37,8 @@ xed-resources.c: ./resources/xed.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES)
 scan_file.o: scan_file.c scan_file.h
 	$(CC) -c $(GLIB) scan_file.c $(GTK) -o scan_file.o
 
-test_scan: test_scan.c scan_file.c
-	$(CC) $(GLIB) test_scan.c $(GTK) -o test_scan
+test_scan: test_scan.c
+	$(CC) test_scan.c $(PCRE) -o test_scan
 
 clean:
 	rm xed-resources.c *.o test_treeview test_search test_scan

@@ -10,7 +10,7 @@ scan_file(char const* const filename, char const* const pattern, XedFullSearchWi
     GRegex *regex;
     GError *err = NULL;
 
-    regex = g_regex_new (pattern, 0, 0, &err);
+    regex = g_regex_new (pattern, G_REGEX_OPTIMIZE, 0, &err);
 
     // TODO -> find fix for this !!!
     if (err != NULL) {
