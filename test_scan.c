@@ -42,10 +42,10 @@ int main(int argc, char *argv[]) {
   char **aLineToMatch;
   const char *psubStrMatchStr;
   int j;
-  char testStrings[] = { "This should match... hello This could match... hello! More than one hello.. hello No chance of a match..." };
+  char testStrings[] = { "This should match... hello This could match... hello! More than one hello.. int main hello No chance of a match... int main " };
 
-
-  aStrRegex = "(.*)(hello)+";  
+  //aStrRegex = "(.*)(hello)+";  
+  aStrRegex = "int main";  
   printf("Regex to use: %s\n", aStrRegex);
 
   // First, the regex string must be compiled.

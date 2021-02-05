@@ -30,10 +30,15 @@ http://scentric.net/tutorial/sec-sorting.html 			!!!!!!!! sortable
 
 
 
-
-
-
-
+PCRE - https://stackoverflow.com/questions/2534477/use-regular-expressions-with-glib
+https://www.mitchr.me/SS/exampleCode/AUPG/pcre_example.c.html
+https://www.mitchr.me/SS/exampleCode/AUPG/regex_example.c.html
+https://javascript.info/regexp-groups
+https://www.mitchr.me/SS/exampleCode/AUPG/
+https://theothersimon.wordpress.com/2011/09/09/quick-pcre-tutorial/
+https://www.pcre.org/original/doc/html/pcre_exec.html
+http://www.pcre.org/original/doc/html/pcredemo.html
+http://www.pcre.org/
 
 
 
