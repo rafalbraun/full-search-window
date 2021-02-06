@@ -93,6 +93,7 @@ int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
     // Report what happened in the pcre_exec call..
     //printf("pcre_exec return: %d\n", pcreExecRet);
     if(pcreExecRet < 0) { // Something bad happened..
+    	/*
       switch(pcreExecRet) {
       case PCRE_ERROR_NOMATCH      : printf("String did not match the pattern\n");        break;
       case PCRE_ERROR_NULL         : printf("Something was null\n");                      break;
@@ -101,7 +102,8 @@ int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
       case PCRE_ERROR_UNKNOWN_NODE : printf("Something kooky in the compiled re\n");      break;
       case PCRE_ERROR_NOMEMORY     : printf("Ran out of memory\n");                       break;
       default                      : printf("Unknown error\n");                           break;
-      } /* end switch */
+      }*/ 
+      /* end switch */
       return pcreExecRet;
     } else {
       printf("Result: We have a match!\n");
@@ -127,27 +129,26 @@ int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
     return subStrVec[0];
 }
 
-int find_all_substr (char* filename) {
+int find_all_substr_in_line (const char* testStrings, const char* aStrRegex) {
 
   pcre *reCompiled;
   pcre_extra *pcreExtra;
 
   const char *pcreErrorStr;
   int pcreErrorOffset;
-  char *aStrRegex;
-  char **aLineToMatch;
+  //char *aStrRegex;
+  //char **aLineToMatch;
 
-  int j;
-
-	char* testStrings = read_file (filename);
+	//char* testStrings = read_file (filename);
 /*
   char testStrings[] = { 
 "This should match... hello This could match... hello! More than one hello.. [int main] hello No chance of a match... [int main] fewuifnuinweerrfnweeunwe[int main]riuewnriwefimweoinwef [int main] wrerwer [int main] wrnwuenru ewrin oinewr [int main] " 
 	};
 */
   //aStrRegex = "(.*)(hello)+";  
-  aStrRegex = "int main";  
-  printf("Regex to use: %s\n", aStrRegex);
+  //aStrRegex = "int main";  
+  
+  //printf("Regex to use: %s\n", aStrRegex);
 
   // First, the regex string must be compiled.
   reCompiled = pcre_compile(aStrRegex, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
@@ -184,17 +185,22 @@ int find_all_substr (char* filename) {
 
   int ret = 1; // for first while loop run
   int sum=0;
+  int i;
 
-  for (int i=0; ret > 0 || i > SUBSTR_VEC_LEN; i++) {
+  for (i=0; ret > 0 || i > SUBSTR_VEC_LEN; i++) {
 	  ret = find_substr (reCompiled, pcreExtra, (char*)testStrings + sum + i);
 	  sum += ret;
 
-	  printf("%d %d %d\n", i, ret, sum+i);
+	  if (ret > 0) {
+	  	printf("%d %d %d\n", i, ret, sum+i);
+	  } else {
+	  	break;
+	  }
   };
 
   // Free up the regular expression.
   pcre_free(reCompiled);
-      
+
   // Free up the EXTRA PCRE value (may be NULL at this point)
   if(pcreExtra != NULL) {
 #ifdef PCRE_CONFIG_JIT
@@ -203,13 +209,36 @@ int find_all_substr (char* filename) {
     pcre_free(pcreExtra);
 #endif
   }
+
+  return i;
 }
 
-int main(int argc, char *argv[]) {
+int find_all_substr_in_file (const char* filename, const char* aStrRegex) {
+    FILE *fp;
+    char str[MAXCHAR];
+    int line=0, col=0;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        printf("Could not open file %s", filename);
+        return 1;
+    }
+    while (fgets(str, MAXCHAR, fp) != NULL) {
+    	int i = find_all_substr_in_line (str, aStrRegex);
+        if (i > 0) {
+        	printf("------------------- [%d, %d] %s :: %d\n", line, col, str, i);
+        }
+        line++;
+    }
+    fclose(fp);
+    return 0;
+}
+
+int main (int argc, char *argv[]) {
 	//read_by_line ("test_scan.c");
 	//return 0;
 
-	find_all_substr ("test_scan.c");
+	find_all_substr_in_file ("test_scan.c", "int main");
 
 	// We are all done..
 	return 0;
