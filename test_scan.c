@@ -31,18 +31,48 @@
 #include <string.h>             /* Strings         C89   */
 
 #define SUBSTR_VEC_LEN 30
+#define MAXCHAR 1000
+
+// https://stackoverflow.com/questions/14002954/c-programming-how-to-read-the-whole-file-contents-into-a-buffer
+char* read_file (const char* filename) {
+	FILE *f = fopen(filename, "rb");
+	fseek(f, 0, SEEK_END);
+	long fsize = ftell(f);
+	fseek(f, 0, SEEK_SET);  /* same as rewind(f); */
+
+	char *string = malloc(fsize + 1);
+	fread(string, 1, fsize, f);
+	fclose(f);
+
+	string[fsize] = 0;
+
+	return string;
+}
+
+int read_by_line (const char* filename) {
+    FILE *fp;
+    char str[MAXCHAR];
+    int line=0, col=0;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        printf("Could not open file %s", filename);
+        return 1;
+    }
+    while (fgets(str, MAXCHAR, fp) != NULL) {
+        printf("[%d, %d] %s", line, col, str);
+        line++;
+    }
+    fclose(fp);
+    return 0;
+}
 
 /**********************************************************************************************************************************/
-int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
+int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
   const char *psubStrMatchStr;
   int subStrVec[SUBSTR_VEC_LEN];
   int pcreExecRet;
   int j;
-
-  //for(aLineToMatch=testStrings; *aLineToMatch != NULL; aLineToMatch++) {
-    // printf("String: %s\n", *aLineToMatch);
-    // printf("        %s\n", "0123456789012345678901234567890123456789");
-    // printf("        %s\n", "0         1         2         3");
 
     /* Try to find the regex in aLineToMatch, and report results. */
     pcreExecRet = pcre_exec(reCompiled,
@@ -83,14 +113,6 @@ int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
         pcreExecRet = SUBSTR_VEC_LEN / 3;
       } /* end if */
 
-      // Do it yourself way to get the first substring match (whole pattern):
-      // char subStrMatchStr[1024];
-      // int i, j
-      // for(j=0,i=subStrVec[0];i<subStrVec[1];i++,j++) 
-      //   subStrMatchStr[j] = (*aLineToMatch)[i];
-      // subStrMatchStr[subStrVec[1]-subStrVec[0]] = 0;
-      //printf("MATCHED SUBSTRING: '%s'\n", subStrMatchStr);
-        
       // PCRE contains a handy function to do the above for you:
       for(j=0; j<pcreExecRet; j++) {
         pcre_get_substring(testStrings, subStrVec, pcreExecRet, j, &(psubStrMatchStr));
@@ -101,13 +123,12 @@ int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
       pcre_free_substring(psubStrMatchStr);
     }  /* end if/else */
     printf("\n");
-      
-  //} /* end for */	
 
     return subStrVec[0];
 }
 
-int main(int argc, char *argv[]) {
+int find_all_substr (char* filename) {
+
   pcre *reCompiled;
   pcre_extra *pcreExtra;
 
@@ -117,10 +138,13 @@ int main(int argc, char *argv[]) {
   char **aLineToMatch;
 
   int j;
+
+	char* testStrings = read_file (filename);
+/*
   char testStrings[] = { 
 "This should match... hello This could match... hello! More than one hello.. [int main] hello No chance of a match... [int main] fewuifnuinweerrfnweeunwe[int main]riuewnriwefimweoinwef [int main] wrerwer [int main] wrnwuenru ewrin oinewr [int main] " 
 	};
-
+*/
   //aStrRegex = "(.*)(hello)+";  
   aStrRegex = "int main";  
   printf("Regex to use: %s\n", aStrRegex);
@@ -158,34 +182,15 @@ int main(int argc, char *argv[]) {
     exit(1);
   } /* end if */
 
-    /*
-  int ret1, ret2, ret3, ret4;
-
-  ret1 = aaa (reCompiled, pcreExtra, (char*)testStrings);
-  printf("%d %d\n", 0, ret1);
-
-  ret2 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+1);
-  printf("%d %d\n", ret2, ret2+ret1);
-
-  ret3 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+2);
-  printf("%d %d\n", ret3, ret3+ret2+ret1);
-
-  ret4 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+ret3+3);
-  printf("%d %d\n", ret4, ret4+ret3+ret2+ret1);
-	*/
-
   int ret = 1; // for first while loop run
-  int sum, i=0;
+  int sum=0;
 
-  while (ret > 0) {
-	  ret = aaa (reCompiled, pcreExtra, (char*)testStrings + sum + i);
+  for (int i=0; ret > 0 || i > SUBSTR_VEC_LEN; i++) {
+	  ret = find_substr (reCompiled, pcreExtra, (char*)testStrings + sum + i);
 	  sum += ret;
 
 	  printf("%d %d %d\n", i, ret, sum+i);
-	  i++;
   };
-
-
 
   // Free up the regular expression.
   pcre_free(reCompiled);
@@ -198,8 +203,15 @@ int main(int argc, char *argv[]) {
     pcre_free(pcreExtra);
 #endif
   }
+}
 
-  // We are all done..
-  return 0;
+int main(int argc, char *argv[]) {
+	//read_by_line ("test_scan.c");
+	//return 0;
+
+	find_all_substr ("test_scan.c");
+
+	// We are all done..
+	return 0;
 
 } /* end func main */
