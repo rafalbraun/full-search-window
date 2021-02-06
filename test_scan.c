@@ -118,7 +118,7 @@ int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
       // PCRE contains a handy function to do the above for you:
       for(j=0; j<pcreExecRet; j++) {
         pcre_get_substring(testStrings, subStrVec, pcreExecRet, j, &(psubStrMatchStr));
-        printf("Match(%2d/%2d): (%2d,%2d): '%s'\n", j, pcreExecRet-1, subStrVec[j*2], subStrVec[j*2+1], psubStrMatchStr);
+        printf("Match(%2d/%2d): (%2d,%2d): '%s' ", j, pcreExecRet-1, subStrVec[j*2], subStrVec[j*2+1], psubStrMatchStr);
       } /* end for */
       
       // Free up the substring
@@ -129,7 +129,7 @@ int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
     return subStrVec[0];
 }
 
-int find_all_substr_in_line (pcre *reCompiled, pcre_extra *pcreExtra, const char* testStrings, const char* aStrRegex) {
+int find_all_substr_in_line (pcre *reCompiled, pcre_extra *pcreExtra, const char* testStrings, const char* aStrRegex, int line) {
 
   int ret = 1; // for first while loop run
   int sum=0;
@@ -139,14 +139,14 @@ int find_all_substr_in_line (pcre *reCompiled, pcre_extra *pcreExtra, const char
 	  ret = find_substr (reCompiled, pcreExtra, (char*)testStrings + sum + i);
 	  sum += ret;
 
-	  if (ret > 0) {
-	  	printf("%d %d %d\n", i, ret, sum+i);
+	  if (ret >= 0) {
+	  	printf("%d %d (%d, %d)\n\n", i, ret, sum+i, line);
 	  } else {
 	  	break;
 	  }
   };
 
-  return i;
+  return 0;
 }
 
 int find_all_substr_in_file (pcre *reCompiled, pcre_extra *pcreExtra, const char* filename, const char* aStrRegex) {
@@ -161,10 +161,12 @@ int find_all_substr_in_file (pcre *reCompiled, pcre_extra *pcreExtra, const char
     }
 
     while (fgets(str, MAXCHAR, fp) != NULL) {
-    	int i = find_all_substr_in_line (reCompiled, pcreExtra, str, aStrRegex);
-        if (i > 0) {
-        	printf("------------------- [%d, %d] %s :: %d\n", line, col, str, i);
-        }
+    	// TODO
+    	// zrobić kolejną pętlę while - fun find_all_substr_in_line powinna zwracać sukcesywnie nowe wystąpienia znaku w danej linii, a jeśli się zakończy to NULL
+    	find_all_substr_in_line (reCompiled, pcreExtra, str, aStrRegex, line);
+        //if (i > 0) {
+        //	printf("------------------- [%d, %d] %s :: %d\n", line, col, str, i);
+        //}
         line++;
     }
 
@@ -247,10 +249,10 @@ void initialize_regex (const char* filename, const char* aStrRegex) {
 int main (int argc, char *argv[]) {
 	//read_by_line ("test_scan.c");
 	//return 0;
-	
+
 	initialize_regex ("test_scan.c", "int main");
-	
+
 	// We are all done..
 	return 0;
-	
+
 } /* end func main */
