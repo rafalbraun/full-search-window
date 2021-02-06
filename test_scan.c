@@ -30,10 +30,12 @@
 #include <stdlib.h>             /* Standard Lib    C89   */
 #include <string.h>             /* Strings         C89   */
 
+#define SUBSTR_VEC_LEN 30
+
 /**********************************************************************************************************************************/
 int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
   const char *psubStrMatchStr;
-  int subStrVec[30];
+  int subStrVec[SUBSTR_VEC_LEN];
   int pcreExecRet;
   int j;
 
@@ -46,11 +48,11 @@ int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
     pcreExecRet = pcre_exec(reCompiled,
                             pcreExtra,
                             testStrings, 
-                            strlen(testStrings),  // length of string
+                            strlen(testStrings),    // length of string
                             0,                      // Start looking at this point
                             0,                      // OPTIONS
                             subStrVec,
-                            30);                    // Length of subStrVec
+                            SUBSTR_VEC_LEN);        // Length of subStrVec
 
     /* pcre_exec OPTIONS (||'ed together) can be:
        PCRE_ANCHORED -- can be turned on at this time.
@@ -70,6 +72,7 @@ int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
       case PCRE_ERROR_NOMEMORY     : printf("Ran out of memory\n");                       break;
       default                      : printf("Unknown error\n");                           break;
       } /* end switch */
+      return pcreExecRet;
     } else {
       printf("Result: We have a match!\n");
         
@@ -77,7 +80,7 @@ int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
       if(pcreExecRet == 0) {
         printf("But too many substrings were found to fit in subStrVec!\n");
         // Set rc to the max number of substring matches possible.
-        pcreExecRet = 30 / 3;
+        pcreExecRet = SUBSTR_VEC_LEN / 3;
       } /* end if */
 
       // Do it yourself way to get the first substring match (whole pattern):
@@ -114,7 +117,9 @@ int main(int argc, char *argv[]) {
   char **aLineToMatch;
 
   int j;
-  char testStrings[] = { "This should match... hello This could match... hello! More than one hello.. int main hello No chance of a match... int main fewuifnuinweuifn int main werrfnwe" };
+  char testStrings[] = { 
+"This should match... hello This could match... hello! More than one hello.. [int main] hello No chance of a match... [int main] fewuifnuinweerrfnweeunwe[int main]riuewnriwefimweoinwef [int main] wrerwer [int main] wrnwuenru ewrin oinewr [int main] " 
+	};
 
   //aStrRegex = "(.*)(hello)+";  
   aStrRegex = "int main";  
@@ -152,34 +157,33 @@ int main(int argc, char *argv[]) {
     printf("ERROR: Could not study '%s': %s\n", aStrRegex, pcreErrorStr);
     exit(1);
   } /* end if */
-/*
+
+    /*
   int ret1, ret2, ret3, ret4;
 
   ret1 = aaa (reCompiled, pcreExtra, (char*)testStrings);
-  printf("%d\n", ret1);
+  printf("%d %d\n", 0, ret1);
 
   ret2 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+1);
-  printf("%d\n", ret2+ret1);
+  printf("%d %d\n", ret2, ret2+ret1);
 
   ret3 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+2);
-  printf("%d\n", ret3+ret2+ret1);
+  printf("%d %d\n", ret3, ret3+ret2+ret1);
 
-  ret4 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+3);
-  printf("%d\n", ret4+ret3+ret2+ret1);
-*/
+  ret4 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+ret3+3);
+  printf("%d %d\n", ret4, ret4+ret3+ret2+ret1);
+	*/
 
-  int i=0;
-  int sum=0;
-  int place=0;
-  int len = strlen(testStrings);
+  int ret = 1; // for first while loop run
+  int sum, i=0;
 
-  while (sum + place < len) {
-    place = aaa (reCompiled, pcreExtra, (char*)testStrings + sum + i);
-    sum += place;
-    printf("[%d] %d\n", i, sum);
-    i++;
-  }
+  while (ret > 0) {
+	  ret = aaa (reCompiled, pcreExtra, (char*)testStrings + sum + i);
+	  sum += ret;
 
+	  printf("%d %d %d\n", i, ret, sum+i);
+	  i++;
+  };
 
 
 
