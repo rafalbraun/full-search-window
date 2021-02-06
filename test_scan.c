@@ -129,7 +129,52 @@ int find_substr (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
     return subStrVec[0];
 }
 
-int find_all_substr_in_line (const char* testStrings, const char* aStrRegex) {
+int find_all_substr_in_line (pcre *reCompiled, pcre_extra *pcreExtra, const char* testStrings, const char* aStrRegex) {
+
+  int ret = 1; // for first while loop run
+  int sum=0;
+  int i;
+
+  for (i=0; ret > 0 || i > SUBSTR_VEC_LEN; i++) {
+	  ret = find_substr (reCompiled, pcreExtra, (char*)testStrings + sum + i);
+	  sum += ret;
+
+	  if (ret > 0) {
+	  	printf("%d %d %d\n", i, ret, sum+i);
+	  } else {
+	  	break;
+	  }
+  };
+
+  return i;
+}
+
+int find_all_substr_in_file (pcre *reCompiled, pcre_extra *pcreExtra, const char* filename, const char* aStrRegex) {
+    FILE *fp;
+    char str[MAXCHAR];
+    int line=0, col=0;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        printf("Could not open file %s", filename);
+        return 1;
+    }
+
+    while (fgets(str, MAXCHAR, fp) != NULL) {
+    	int i = find_all_substr_in_line (reCompiled, pcreExtra, str, aStrRegex);
+        if (i > 0) {
+        	printf("------------------- [%d, %d] %s :: %d\n", line, col, str, i);
+        }
+        line++;
+    }
+
+    // clean the mess
+    fclose(fp);
+
+    return 0;
+}
+
+void initialize_regex (const char* filename, const char* aStrRegex) {
 
   pcre *reCompiled;
   pcre_extra *pcreExtra;
@@ -183,20 +228,7 @@ int find_all_substr_in_line (const char* testStrings, const char* aStrRegex) {
     exit(1);
   } /* end if */
 
-  int ret = 1; // for first while loop run
-  int sum=0;
-  int i;
-
-  for (i=0; ret > 0 || i > SUBSTR_VEC_LEN; i++) {
-	  ret = find_substr (reCompiled, pcreExtra, (char*)testStrings + sum + i);
-	  sum += ret;
-
-	  if (ret > 0) {
-	  	printf("%d %d %d\n", i, ret, sum+i);
-	  } else {
-	  	break;
-	  }
-  };
+	find_all_substr_in_file (reCompiled, pcreExtra, filename, aStrRegex);
 
   // Free up the regular expression.
   pcre_free(reCompiled);
@@ -209,38 +241,16 @@ int find_all_substr_in_line (const char* testStrings, const char* aStrRegex) {
     pcre_free(pcreExtra);
 #endif
   }
-
-  return i;
 }
 
-int find_all_substr_in_file (const char* filename, const char* aStrRegex) {
-    FILE *fp;
-    char str[MAXCHAR];
-    int line=0, col=0;
-
-    fp = fopen(filename, "r");
-    if (fp == NULL){
-        printf("Could not open file %s", filename);
-        return 1;
-    }
-    while (fgets(str, MAXCHAR, fp) != NULL) {
-    	int i = find_all_substr_in_line (str, aStrRegex);
-        if (i > 0) {
-        	printf("------------------- [%d, %d] %s :: %d\n", line, col, str, i);
-        }
-        line++;
-    }
-    fclose(fp);
-    return 0;
-}
 
 int main (int argc, char *argv[]) {
 	//read_by_line ("test_scan.c");
 	//return 0;
-
-	find_all_substr_in_file ("test_scan.c", "int main");
-
+	
+	initialize_regex ("test_scan.c", "int main");
+	
 	// We are all done..
 	return 0;
-
+	
 } /* end func main */
