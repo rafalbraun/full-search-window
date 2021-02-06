@@ -31,55 +31,11 @@
 #include <string.h>             /* Strings         C89   */
 
 /**********************************************************************************************************************************/
-int main(int argc, char *argv[]) {
-  pcre *reCompiled;
-  pcre_extra *pcreExtra;
-  int pcreExecRet;
-  int subStrVec[30];
-  const char *pcreErrorStr;
-  int pcreErrorOffset;
-  char *aStrRegex;
-  char **aLineToMatch;
+int aaa (pcre *reCompiled, pcre_extra *pcreExtra, char *testStrings) {
   const char *psubStrMatchStr;
+  int subStrVec[30];
+  int pcreExecRet;
   int j;
-  char testStrings[] = { "This should match... hello This could match... hello! More than one hello.. int main hello No chance of a match... int main " };
-
-  //aStrRegex = "(.*)(hello)+";  
-  aStrRegex = "int main";  
-  printf("Regex to use: %s\n", aStrRegex);
-
-  // First, the regex string must be compiled.
-  reCompiled = pcre_compile(aStrRegex, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
-
-  /* OPTIONS (second argument) (||'ed together) can be:
-       PCRE_ANCHORED       -- Like adding ^ at start of pattern.
-       PCRE_CASELESS       -- Like m//i
-       PCRE_DOLLAR_ENDONLY -- Make $ match end of string regardless of \n's
-                              No Perl equivalent.
-       PCRE_DOTALL         -- Makes . match newlins too.  Like m//s
-       PCRE_EXTENDED       -- Like m//x
-       PCRE_EXTRA          -- 
-       PCRE_MULTILINE      -- Like m//m
-       PCRE_UNGREEDY       -- Set quantifiers to be ungreedy.  Individual quantifiers
-                              may be set to be greedy if they are followed by "?".
-       PCRE_UTF8           -- Work with UTF8 strings.
-  */
-
-  // pcre_compile returns NULL on error, and sets pcreErrorOffset & pcreErrorStr
-  if(reCompiled == NULL) {
-    printf("ERROR: Could not compile '%s': %s\n", aStrRegex, pcreErrorStr);
-    exit(1);
-  } /* end if */
-
-  // Optimize the regex
-  pcreExtra = pcre_study(reCompiled, 0, &pcreErrorStr);
-
-  /* pcre_study() returns NULL for both errors and when it can not optimize the regex.  The last argument is how one checks for
-     errors (it is NULL if everything works, and points to an error string otherwise. */
-  if(pcreErrorStr != NULL) {
-    printf("ERROR: Could not study '%s': %s\n", aStrRegex, pcreErrorStr);
-    exit(1);
-  } /* end if */
 
   //for(aLineToMatch=testStrings; *aLineToMatch != NULL; aLineToMatch++) {
     // printf("String: %s\n", *aLineToMatch);
@@ -137,14 +93,96 @@ int main(int argc, char *argv[]) {
         pcre_get_substring(testStrings, subStrVec, pcreExecRet, j, &(psubStrMatchStr));
         printf("Match(%2d/%2d): (%2d,%2d): '%s'\n", j, pcreExecRet-1, subStrVec[j*2], subStrVec[j*2+1], psubStrMatchStr);
       } /* end for */
-        
+      
       // Free up the substring
       pcre_free_substring(psubStrMatchStr);
     }  /* end if/else */
     printf("\n");
       
-  //} /* end for */
-  
+  //} /* end for */	
+
+    return subStrVec[0];
+}
+
+int main(int argc, char *argv[]) {
+  pcre *reCompiled;
+  pcre_extra *pcreExtra;
+
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  char *aStrRegex;
+  char **aLineToMatch;
+
+  int j;
+  char testStrings[] = { "This should match... hello This could match... hello! More than one hello.. int main hello No chance of a match... int main fewuifnuinweuifn int main werrfnwe" };
+
+  //aStrRegex = "(.*)(hello)+";  
+  aStrRegex = "int main";  
+  printf("Regex to use: %s\n", aStrRegex);
+
+  // First, the regex string must be compiled.
+  reCompiled = pcre_compile(aStrRegex, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+
+  /* OPTIONS (second argument) (||'ed together) can be:
+       PCRE_ANCHORED       -- Like adding ^ at start of pattern.
+       PCRE_CASELESS       -- Like m//i
+       PCRE_DOLLAR_ENDONLY -- Make $ match end of string regardless of \n's
+                              No Perl equivalent.
+       PCRE_DOTALL         -- Makes . match newlins too.  Like m//s
+       PCRE_EXTENDED       -- Like m//x
+       PCRE_EXTRA          -- 
+       PCRE_MULTILINE      -- Like m//m
+       PCRE_UNGREEDY       -- Set quantifiers to be ungreedy.  Individual quantifiers
+                              may be set to be greedy if they are followed by "?".
+       PCRE_UTF8           -- Work with UTF8 strings.
+  */
+
+  // pcre_compile returns NULL on error, and sets pcreErrorOffset & pcreErrorStr
+  if(reCompiled == NULL) {
+    printf("ERROR: Could not compile '%s': %s\n", aStrRegex, pcreErrorStr);
+    exit(1);
+  } /* end if */
+
+  // Optimize the regex
+  pcreExtra = pcre_study(reCompiled, 0, &pcreErrorStr);
+
+  /* pcre_study() returns NULL for both errors and when it can not optimize the regex.  The last argument is how one checks for
+     errors (it is NULL if everything works, and points to an error string otherwise. */
+  if(pcreErrorStr != NULL) {
+    printf("ERROR: Could not study '%s': %s\n", aStrRegex, pcreErrorStr);
+    exit(1);
+  } /* end if */
+/*
+  int ret1, ret2, ret3, ret4;
+
+  ret1 = aaa (reCompiled, pcreExtra, (char*)testStrings);
+  printf("%d\n", ret1);
+
+  ret2 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+1);
+  printf("%d\n", ret2+ret1);
+
+  ret3 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+2);
+  printf("%d\n", ret3+ret2+ret1);
+
+  ret4 = aaa (reCompiled, pcreExtra, (char*)testStrings+ret1+ret2+3);
+  printf("%d\n", ret4+ret3+ret2+ret1);
+*/
+
+  int i=0;
+  int sum=0;
+  int place=0;
+  int len = strlen(testStrings);
+
+  while (sum + place < len) {
+    place = aaa (reCompiled, pcreExtra, (char*)testStrings + sum + i);
+    sum += place;
+    printf("[%d] %d\n", i, sum);
+    i++;
+  }
+
+
+
+
   // Free up the regular expression.
   pcre_free(reCompiled);
       
