@@ -1,7 +1,6 @@
 #define GLIB_VERSION_2_28               (G_ENCODE_VERSION (2, 28))
 #define GLIB_VERSION_MIN_REQUIRED       GLIB_VERSION_2_28
 
-#include "scan_file.c"
 #include "xed-full-search-window.h"
 
 #include <glib.h>
@@ -72,6 +71,67 @@ add_to_list(GtkListStore *liststore, const char *occurrence, const char *line, g
   gtk_list_store_set(liststore, &iter, 0, occurrence, 1, line, 2, lnum, 3, start, 4, end, 5, filepath, -1);
 }
 
+#define MAXCHAR 1000
+
+char buf[MAXCHAR];
+char str[MAXCHAR];
+
+// https://stackoverflow.com/questions/29866616/how-to-find-all-occurrences-of-a-substring-in-c
+int find_all_substr_in_line (const char* str, const char* aStrRegex, int line, const char* filename, XedFullSearchWindow* window) {
+
+	char *ptr = strstr(str, aStrRegex);
+	
+	while (ptr) {
+
+	    //printf ("[%s] %d :: %s ", filename, line, ptr);
+	    
+    	size_t len = strlen(aStrRegex);
+    	strncpy(buf, ptr, len);
+		buf[len] = '\0';
+
+		//printf("%d :: %s ", line, buf);
+
+		int start = ptr - str;
+		int end = start + strlen(aStrRegex);
+
+		GtkListStore* liststore = GTK_LIST_STORE (window->liststore);
+		add_to_list (liststore, g_strdup(str), g_strdup(filename), line+1, start, end, filename);
+
+	    ptr = strstr(ptr+1, aStrRegex);
+
+	    //printf("\n");
+	}
+
+  	return 0;
+}
+
+int find_all_substr_in_file (const char* filename, const char* aStrRegex, XedFullSearchWindow* window) {
+    FILE *fp;
+    int line=0, col=0;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        printf("Could not open file %s", filename);
+        return 1;
+    }
+
+    while (fgets(str, MAXCHAR, fp) != NULL) {
+		find_all_substr_in_line (str, aStrRegex, line, filename, window);
+        line++;
+    }
+    fclose(fp);
+
+    return 0;
+}
+
+int find_all_substr_in_all_files (const char** filenamesArr, int filenamesArrSize, const char* aStrRegex, XedFullSearchWindow* window) {
+	for (int i=0; i<filenamesArrSize; i++) {
+		find_all_substr_in_file (filenamesArr[i], aStrRegex, window);
+	}
+}
+
+/////////////////////////////////////////////////////////////////
+
 static gboolean
 is_hidden (const char* entry_name) {
 	//g_strcmp0(dp->d_name, ".") != 0 && g_strcmp0(dp->d_name, "..") != 0 && (dp->d_name[0]!='.') {}
@@ -84,7 +144,7 @@ is_hidden (const char* entry_name) {
 	}
 	return FALSE;
 }
-
+/*
 static int 
 list_directory (char* dirname, const char* pattern, XedFullSearchWindow* window) {
 
@@ -120,10 +180,37 @@ list_directory (char* dirname, const char* pattern, XedFullSearchWindow* window)
 
     closedir(dir);
 }
+*/
+const char* filenamesArr[] = {
+"full_search.c",
+"full_search.h",
+"full_search.ui",
+"glib_regex.c",
+"main.c",
+"Makefile",
+"pcredemo.c",
+"README.md",
+"scan_file.c",
+"scan_file.h",
+"test_scan.c",
+"test_scan_regex.c",
+"test_search.c",
+"test_treeview.c",
+"xed-full-search-window.c",
+"xed-full-search-window.h",
+"xed-highlight-mode-dialog.c",
+"xed-highlight-mode-dialog.h",
+"xed-highlight-mode-selector.c",
+"xed-highlight-mode-selector.h",
+"xed-resources.c",
+"xed-tree-view.c",
+"xed-tree-view.h"
+};
 
 gboolean
 on_entry_key_press_event (GtkWidget *entry,
-               GdkEventKey  *event,
+               //GdkEventKey  *event,
+               //char     *preedit,
                XedFullSearchWindow 	     *window)
 {
 	GtkEntry* e = GTK_ENTRY(entry);
@@ -150,8 +237,10 @@ on_entry_key_press_event (GtkWidget *entry,
 		// TODO
 		// tutaj usuwamy i dodajemy wiec pewnie to tutaj dac trzeba zapamietac -> unselect_all -> przywrocic
 		window->flag = 1;
+
 		gtk_list_store_clear (window->liststore);
-		list_directory (window->search_path, preedit, window);
+		find_all_substr_in_all_files (filenamesArr, 24, preedit, window);
+
 		window->flag = 0;
 	}
 
@@ -314,7 +403,7 @@ xed_full_search_window_init (XedFullSearchWindow *window) {
 
 	window->search_path = "/home/rafal/IdeaProjects/xed";
 
-	g_signal_connect (window->entry, "key-press-event",
+	g_signal_connect (window->entry, "changed",
 	                  G_CALLBACK (on_entry_key_press_event), window);
 
 	//g_signal_connect (window->selection, "changed", 
