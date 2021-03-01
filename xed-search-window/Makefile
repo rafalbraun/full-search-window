@@ -18,6 +18,6 @@ xed-resources.c: ./resources/xed.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES)
 
 clean:
 	rm -f xed-resources.c 
-	rm -f *.o
+	rm -f xed-full-search-window.o
 	rm -f a.out
 

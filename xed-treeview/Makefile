@@ -5,10 +5,10 @@ PCRE=`pkg-config --cflags --libs libpcre`
 GLIB_COMPILE_RESOURCES = /usr/local/bin/glib-compile-resources
 COMPONENTS=xed-resources.c xed-tree-view.o 
 
-all: test_treeview 
+all: a.out 
 
-test_treeview: test_treeview.c $(COMPONENTS)
-	$(CC) $(GLIB) test_treeview.c $(COMPONENTS) $(GTK) -o test_treeview
+a.out : main.c $(COMPONENTS)
+	$(CC) $(GLIB) main.c $(COMPONENTS) $(GTK) -o a.out 
 
 xed-tree-view.o: xed-tree-view.c
 	$(CC) -c $(GLIB) xed-tree-view.c $(GTK) -o xed-tree-view.o
@@ -17,7 +17,7 @@ xed-resources.c: ./resources/xed.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES)
 	$(GLIB_COMPILE_RESOURCES) --target=xed-resources.c --sourcedir=./resources --generate-source ./resources/xed.gresource.xml
 
 clean:
-	rm -f *.o 
+	rm -f xed-tree-view.o 
 	rm -f xed-resources.c 
-	rm -f test_treeview
+	rm -f a.out 
 
