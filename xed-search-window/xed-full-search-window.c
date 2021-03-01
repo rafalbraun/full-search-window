@@ -111,7 +111,7 @@ int find_all_substr_in_file (const char* filename, const char* aStrRegex, XedFul
 
     fp = fopen(filename, "r");
     if (fp == NULL){
-        printf("Could not open file %s", filename);
+        printf("Could not open file %s \n", filename);
         return 1;
     }
 
@@ -182,29 +182,11 @@ list_directory (char* dirname, const char* pattern, XedFullSearchWindow* window)
 }
 */
 const char* filenamesArr[] = {
-"full_search.c",
-"full_search.h",
-"full_search.ui",
-"glib_regex.c",
 "main.c",
 "Makefile",
-"pcredemo.c",
-"README.md",
-"scan_file.c",
-"scan_file.h",
-"test_scan.c",
-"test_scan_regex.c",
-"test_search.c",
-"test_treeview.c",
 "xed-full-search-window.c",
 "xed-full-search-window.h",
-"xed-highlight-mode-dialog.c",
-"xed-highlight-mode-dialog.h",
-"xed-highlight-mode-selector.c",
-"xed-highlight-mode-selector.h",
-"xed-resources.c",
-"xed-tree-view.c",
-"xed-tree-view.h"
+"xed-resources.c"
 };
 
 gboolean
@@ -239,7 +221,7 @@ on_entry_key_press_event (GtkWidget *entry,
 		window->flag = 1;
 
 		gtk_list_store_clear (window->liststore);
-		find_all_substr_in_all_files (filenamesArr, 24, preedit, window);
+		find_all_substr_in_all_files (filenamesArr, 5, preedit, window);
 
 		window->flag = 0;
 	}
