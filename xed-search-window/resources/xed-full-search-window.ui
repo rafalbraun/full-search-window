@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-   <object class="GtkListStore" id="liststore1">
+   <!-- interface-requires gtk+ 3.8 -->
+   <object class="GtkListStore" id="liststore">
       <columns>
          <column type="gchararray" />
          <column type="gchararray" />
-         <column type="gchararray" />
-         <column type="gchararray" />
-         <column type="gchararray" />
+         <column type="gint" />
+         <column type="gint" />
+         <column type="gint" />
          <column type="gchararray" />
       </columns>
    </object>
    <object class="GtkListStore" id="combobox_model">
-      <columns>
-         <column type="gchararray" />
-      </columns>
-      <data>
-         <row><col id="0" translatable="yes">*.c</col>        </row>
-         <row><col id="0" translatable="yes">*.cpp</col>      </row>
-         <row><col id="0" translatable="yes">*.css</col>      </row>
-         <row><col id="0" translatable="yes">*.groovy</col>   </row>
-         <row><col id="0" translatable="yes">*.java</col>     </row>
-      </data>
+        <columns>
+            <column type="gchararray" />
+        </columns>
+        <data>
+            <row><col id="0" translatable="yes">*.c</col>        </row>
+            <row><col id="0" translatable="yes">*.cpp</col>      </row>
+            <row><col id="0" translatable="yes">*.css</col>      </row>
+            <row><col id="0" translatable="yes">*.groovy</col>   </row>
+            <row><col id="0" translatable="yes">*.java</col>     </row>
+        </data>
    </object>
-   <object id="window" class="GtkWindow">
-      <property name="visible">True</property>
-      <property name="title">Full Search</property>
-      <property name="border-width">2</property>
+   <object class="GtkAdjustment" id="vadjustment"></object>
+   <template class="XedFullSearchWindow" parent="GtkDialog">
       <property name="default-width">1000</property>
       <property name="default-height">800</property>
-      <child>
-         <object class="GtkBox">
+      <property name="title" translatable="yes">Full Search</property>
+
+      <child internal-child="vbox">
+         <object class="GtkBox" id="dialog-vbox1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
@@ -39,7 +40,7 @@
                   <property name="can_focus">False</property>
                   <property name="orientation">horizontal</property>
                   <child>
-                     <object class="GtkCheckButton">
+                     <object class="GtkCheckButton" id="regex">
                         <property name="visible">True</property>
                         <property name="label">Regex</property>
                      </object>
@@ -50,7 +51,7 @@
                      </packing>
                   </child>
                   <child>
-                     <object class="GtkCheckButton">
+                     <object class="GtkCheckButton" id="match_case">
                         <property name="visible">True</property>
                         <property name="label">Match Case</property>
                      </object>
@@ -61,7 +62,7 @@
                      </packing>
                   </child>
                   <child>
-                     <object class="GtkCheckButton">
+                     <object class="GtkCheckButton" id="file_mask">
                         <property name="visible">True</property>
                         <property name="label">File Mask:</property>
                         <property name="halign">GTK_ALIGN_END</property>
@@ -73,14 +74,14 @@
                      </packing>
                   </child>
                   <child>
-                     <object class="GtkComboBox" id="combobox">
+                     <object class="GtkComboBox" id="file_type">
                         <property name="visible">True</property>
                         <property name="model">combobox_model</property>
                         <property name="hexpand">True</property>
                         <property name="halign">GTK_ALIGN_END</property>
                         <property name="has-frame">True</property>
                         <child>
-                           <object class="GtkCellRendererText" id="cellrenderertext18" />
+                           <object class="GtkCellRendererText" />
                            <attributes>
                               <attribute name="text">0</attribute>
                            </attributes>
@@ -97,6 +98,7 @@
                   <property name="position">0</property>
                </packing>
             </child>
+
             <child>
                <object class="GtkBox">
                   <property name="visible">True</property>
@@ -118,6 +120,11 @@
                   <property name="position">1</property>
                </packing>
             </child>
+
+            <!--
+                below: GtkSourceView + GtkTreeView
+            -->
+
             <child>
                <object class="GtkPaned" id="paned">
                   <property name="visible">True</property>
@@ -129,13 +136,13 @@
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
                         <child>
-                           <object class="GtkTreeView" id="treeview1">
+                           <object class="GtkTreeView" id="treeview">
                               <property name="visible">True</property>
                               <property name="can_focus">True</property>
-                              <property name="model">liststore1</property>
+                              <property name="model">liststore</property>
                               <property name="enable-search">False</property>
                               <child internal-child="selection">
-                                 <object class="GtkTreeSelection" id="treeview-selection" />
+                                 <object class="GtkTreeSelection" id="selection" />
                               </child>
                               <child>
                                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
@@ -226,22 +233,23 @@
                      </object>
                   </child>
                   <child>
-                     <object class="GtkScrolledWindow" id="textbufferscroll">
+                     <object class="GtkScrolledWindow" id="scrolled_window">
+                        <property name="vadjustment">vadjustment</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
                         <child>
-                           <object class="GtkSourceBuffer" id="textbuffer">
+                           <object class="GtkSourceBuffer" id="source_buffer">
                               <property name="highlight-syntax">True</property>
                            </object>
-                           <object class="GtkSourceView">
+                           <object class="GtkSourceView" id="source_view">
                               <property name="highlight-current-line">True</property>
                               <property name="show-right-margin">True</property>
                               <property name="show-line-numbers">True</property>
                               <property name="tab_width">4</property>
                               <property name="auto_indent">True</property>
                               <property name="visible">True</property>
-                              <property name="buffer">textbuffer</property>
+                              <property name="buffer">source_buffer</property>
                               <property name="editable">True</property>
                               <property name="monospace">True</property>
                            </object>
@@ -255,7 +263,9 @@
                   <property name="position">2</property>
                </packing>
             </child>
+
          </object>
       </child>
-   </object>
+
+   </template>
 </interface>
