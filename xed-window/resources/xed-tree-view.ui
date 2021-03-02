@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+   <object class="GtkTreeStore" id="treestore">
+      <columns>
+         <column type="gchararray" />
+      </columns>
+   </object>
+  <template class="XedTreeView" parent="GtkScrolledWindow">
+    <property name="width_request">400</property>
+    <property name="height_request">900</property>
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="shadow_type">in</property>
+    <child>
+  	<object class="GtkTreeView" id="treeview">
+    <property name="visible">True</property>
+    <property name="model">treestore</property>
+    <property name="headers-visible">False</property>
+	  <child internal-child="selection">
+	     <object class="GtkTreeSelection" id="selection" />
+	  </child>
+      <child>
+         <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+            <child>
+               <object class="GtkCellRendererText" id="cellrenderertext1">
+                  <property name="height">26</property>
+               </object>
+               <attributes>
+                  <attribute name="text">0</attribute>
+               </attributes>
+            </child>
+         </object>
+      </child>
+  	</object>
+  </child>
+  </template>
+</interface>

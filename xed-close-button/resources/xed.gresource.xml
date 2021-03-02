@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/x/editor/ui">
+    <file>xed-highlight-mode-dialog.ui</file>
+    <file>xed-highlight-mode-selector.ui</file>
+    <file>xed-full-search-window.ui</file>
+    <file>xed-tree-view.ui</file>
+  </gresource>
+</gresources>
