@@ -44,11 +44,11 @@
 #include "xed-document-private.h"
 
 #include "xed-debug.h"
+#include "xed-utils.h"
+#include "xed-metadata-manager.h"
 
 /*
 #include "xed-settings.h"
-#include "xed-utils.h"
-#include "xed-metadata-manager.h"
 */
 
 #define METADATA_QUERY "metadata::*"

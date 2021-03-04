@@ -1,0 +1,50 @@
+LO_FILES=xed-resources.lo xed-commands-documents.lo xed-commands-edit.lo xed-commands-file.lo xed-commands-help.lo xed-commands-search.lo xed-commands-view.lo
+COMPILE=/bin/bash ./libtool --silent --tag=CC   --mode=compile gcc -Wno-deprecated-declarations -w -DHAVE_CONFIG_H -I. -I..  -I.. -I. -pthread -I/usr/local/include -I/usr/local/include/gio-unix-2.0 -I/usr/local/include -I/usr/local/include/glib-2.0 -I/usr/local/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gtksourceview-3.0 -I/usr/include/libpeas-1.0 -I/usr/include/gobject-introspection-1.0 -I/usr/include/xapp -I/usr/include/libxml2 -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/libpng16  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs -Werror=return-type  -pthread -I/usr/local/include -I/usr/local/include/glib-2.0 -I/usr/local/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gobject-introspection-1.0  
+GLIB_MKENUMS = /usr/local/bin/glib-mkenums
+GLIB_GENMARSHAL = /usr/local/bin/glib-genmarshal
+GLIB_COMPILE_RESOURCES = /usr/local/bin/glib-compile-resources
+am__objects= $(am__objects_2)
+
+INST_H_FILES = xed-debug.h xed-document.h xed-metadata-manager.h xed-utils.h
+am__objects_2 = xed-debug.lo xed-document.lo xed-metadata-manager.lo xed-utils.lo
+
+
+LIBTOOL=/bin/bash ./libtool --silent --tag=CC --mode=link gcc
+#DATADIR=\""/usr/local/share"\" 
+#LIBDIR=\""/usr/local/lib"\" 
+DATADIR=\""/home/rafal/Desktop/myxed/data"\"
+LIBDIR=\""/home/rafal/Desktop/myxed/lib"\"
+
+all: xed
+
+$(am__objects) : %.lo: %.c .deps/%.Plo
+	$(COMPILE) -DDATADIR=$(DATADIR) -DLIBDIR=$(LIBDIR)   -g -O2 -MT $@ -MD -MP -MF $(lastword $^) -c -o $@ $(firstword $^)
+
+xed.o: xed.c
+	gcc -DHAVE_CONFIG_H -I. -I..  -I.. -I. -pthread -I/usr/local/include -I/usr/local/include/gio-unix-2.0 -I/usr/local/include -I/usr/local/include/glib-2.0 -I/usr/local/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gtksourceview-3.0 -I/usr/include/libpeas-1.0 -I/usr/include/gobject-introspection-1.0 -I/usr/include/xapp -I/usr/include/libxml2 -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/uuid -I/usr/include/freetype2 -I/usr/include/libpng16  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs -Werror=return-type  -pthread -I/usr/local/include -I/usr/local/include/glib-2.0 -I/usr/local/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gobject-introspection-1.0  -DDATADIR=$(DATADIR) -DLIBDIR=$(LIBDIR)   -g -O2 -MT xed.o -MD -MP -MF .deps/xed.Tpo -c -o xed.o xed.c
+
+xed: xed.o libxed.la
+	$(LIBTOOL) -Wno-deprecated-declarations -w -g -O2 -export-dynamic -no-undefined -export-symbols-regex "^[[^_]].*"  -o xed xed.o libxed.la -L/usr/local/lib/x86_64-linux-gnu -lxml2 -lgthread-2.0 -pthread -lgtksourceview-3.0 -lpeas-gtk-1.0 -lpeas-1.0 -Wl,--export-dynamic -lgmodule-2.0 -pthread -lgirepository-1.0 -lxapp -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lcairo -lX11 -L/usr/local/lib/x86_64-linux-gnu -lgirepository-1.0 -lgobject-2.0 -lglib-2.0 -lm 
+
+libxed.la: $(am__objects) 
+	$(LIBTOOL) -Wno-deprecated-declarations -w -g -O2 -avoid-version -export-dynamic -no-undefined -export-symbols-regex "^[^_].*"  -o libxed.la -rpath /home/rafal/Desktop/myxed/lib/xed  $(am__objects) -L/usr/local/lib/x86_64-linux-gnu -lxml2 -lgthread-2.0 -pthread -lgtksourceview-3.0 -lpeas-gtk-1.0 -lpeas-1.0 -Wl,--export-dynamic -lgmodule-2.0 -pthread -lgirepository-1.0 -lxapp -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lcairo -lX11 -lm 
+	##$(LIBTOOL) -Wno-deprecated-declarations -w -g -O2 -avoid-version -export-dynamic -no-undefined -export-symbols-regex "^[^_].*"  -o libxed.la -rpath /usr/local/lib/xed  $(am__objects) -L/usr/local/lib/x86_64-linux-gnu -lxml2 -lgthread-2.0 -pthread -lgtksourceview-3.0 -lpeas-gtk-1.0 -lpeas-1.0 -Wl,--export-dynamic -lgmodule-2.0 -pthread -lgirepository-1.0 -lxapp -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lcairo -lX11 -lm 
+
+
+xed-resources.c: ./resources/xed.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./resources --generate-dependencies ./resources/xed.gresource.xml)
+	$(GLIB_COMPILE_RESOURCES) --target=$@ --sourcedir=./resources --generate-source ./resources/xed.gresource.xml
+
+clean:
+	rm -f $(am__headers)
+	rm -f $(am__objects)
+	rm -f xed xed.o libxed.la
+
+
+
+#Xed-1.0.typelib: Xed-1.0.gir
+#	/usr/bin/g-ir-compiler  --includedir=. Xed-1.0.gir -o Xed-1.0.typelib
+
+#$(objects2): %.out: %.c
+#	$(CC) $(CFLAGS) $< -o $@
+
+
