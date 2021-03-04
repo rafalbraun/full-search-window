@@ -42,6 +42,10 @@ main( int argc, char *argv[] )
 
   /* Create the GtkSourceView and associate it with the buffer */
   sView = gtk_source_view_new_with_buffer(sBuf);
+
+	gtk_source_view_set_show_line_marks (sView, TRUE);
+	gtk_source_view_set_show_line_numbers (sView, TRUE);
+
      /* Set default Font name,size */
      font_desc = pango_font_description_from_string ("mono 8");
      gtk_widget_modify_font (sView, font_desc);
@@ -91,13 +95,16 @@ open_file (GtkSourceBuffer *sBuf, const gchar *filename)
   if (language == NULL)
   {
     g_print ("No language found for mime type `%s'\n", "text/x-csrc");
-    g_object_set (G_OBJECT (sBuf), "highlight", FALSE, NULL);
+    g_object_set (G_OBJECT (sBuf), "highlight-syntax", FALSE, NULL);
   }
   else
   {
    gtk_source_buffer_set_language (sBuf, language);
-   g_object_set (G_OBJECT (sBuf), "highlight", TRUE, NULL);
+   g_object_set (G_OBJECT (sBuf), "highlight-syntax", TRUE, NULL);
   }
+
+//	gtk_source_buffer_set_highlight_syntax (sBuf, TRUE);
+//	gtk_source_buffer_set_highlight_matching_brackets (sBuf, TRUE);
 
   /* Now load the file from Disk */
   io = g_io_channel_new_file (filename, "r", &err);
@@ -169,4 +176,7 @@ open_file (GtkSourceBuffer *sBuf, const gchar *filename)
 
   return TRUE;
 }
+
+
+
 
