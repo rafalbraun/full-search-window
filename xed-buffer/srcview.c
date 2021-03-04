@@ -1,8 +1,126 @@
+#define GLIB_VERSION_2_28               (G_ENCODE_VERSION (2, 28))
+#define GLIB_VERSION_MIN_REQUIRED       GLIB_VERSION_2_28
+
 #include <gtk/gtk.h>
+#include <gtksourceview/gtksource.h>
+
+/*
 #include <gtksourceview/gtksourceview.h>
 #include <gtksourceview/gtksourcebuffer.h>
 #include <gtksourceview/gtksourcelanguage.h>
 #include <gtksourceview/gtksourcelanguagemanager.h>
+*/
+
+#define MARK_TYPE_1      "one"
+#define MARK_TYPE_2      "two"
+
+
+
+static void
+line_mark_activated_cb (GtkSourceGutter *gutter,
+			GtkTextIter     *iter,
+			GdkEventButton  *event,
+			GtkSourceBuffer      *buffer)
+{
+	GSList *mark_list;
+	const gchar *mark_type;
+
+	mark_type = event->button == 1 ? MARK_TYPE_1 : MARK_TYPE_2;
+
+	/* get the marks already in the line */
+	mark_list = gtk_source_buffer_get_source_marks_at_line (buffer,
+								gtk_text_iter_get_line (iter),
+								mark_type);
+
+	if (mark_list != NULL)
+	{
+		/* just take the first and delete it */
+		gtk_text_buffer_delete_mark (GTK_TEXT_BUFFER (buffer),
+					     GTK_TEXT_MARK (mark_list->data));
+	}
+	else
+	{
+		/* no mark found: create one */
+		gtk_source_buffer_create_source_mark (buffer,
+						      NULL,
+						      mark_type,
+						      iter);
+	}
+
+	g_slist_free (mark_list);
+}
+
+static gchar *
+mark_tooltip_func (GtkSourceMarkAttributes *attrs,
+                   GtkSourceMark           *mark,
+                   GtkSourceView           *view)
+{
+	g_print("aaaaaaaaaaa\n");
+
+	return g_strdup_printf ("aaaa");
+
+/*
+	GtkTextBuffer *buffer;
+	GtkTextIter iter;
+	gint line;
+	gint column;
+
+	buffer = gtk_text_mark_get_buffer (GTK_TEXT_MARK (mark));
+
+	gtk_text_buffer_get_iter_at_mark (buffer, &iter, GTK_TEXT_MARK (mark));
+	line = gtk_text_iter_get_line (&iter) + 1;
+	column = gtk_text_iter_get_line_offset (&iter);
+
+	if (g_strcmp0 (gtk_source_mark_get_category (mark), MARK_TYPE_1) == 0)
+	{
+		return g_strdup_printf ("Line: %d, Column: %d", line, column);
+	}
+	else
+	{
+		return g_strdup_printf ("<b>Line</b>: %d\n<i>Column</i>: %d", line, column);
+	}
+*/
+}
+
+static void
+add_source_mark_attributes (GtkSourceView *view)
+{
+	GdkRGBA color;
+	GtkSourceMarkAttributes *attrs;
+
+	attrs = gtk_source_mark_attributes_new ();
+
+	gdk_rgba_parse (&color, "lightgreen");
+	gtk_source_mark_attributes_set_background (attrs, &color);
+
+	gtk_source_mark_attributes_set_icon_name (attrs, "list-add");
+
+	g_signal_connect_object (attrs,
+				 "query-tooltip-markup",
+				 G_CALLBACK (mark_tooltip_func),
+				 view,
+				 0);
+
+	gtk_source_view_set_mark_attributes (view, MARK_TYPE_1, attrs, 1);
+	g_object_unref (attrs);
+
+	attrs = gtk_source_mark_attributes_new ();
+
+	gdk_rgba_parse (&color, "pink");
+	gtk_source_mark_attributes_set_background (attrs, &color);
+
+	gtk_source_mark_attributes_set_icon_name (attrs, "list-remove");
+
+	g_signal_connect_object (attrs,
+				 "query-tooltip-markup",
+				 G_CALLBACK (mark_tooltip_func),
+				 view,
+				 0);
+
+	gtk_source_view_set_mark_attributes (view, MARK_TYPE_2, attrs, 2);
+	g_object_unref (attrs);
+}
+
 
 /**
  * http://www.bravegnu.org/gtktext/x561.html
@@ -43,8 +161,15 @@ main( int argc, char *argv[] )
 	/* Create the GtkSourceView and associate it with the buffer */
 	sView = gtk_source_view_new_with_buffer(sBuf);
 
-	gtk_source_view_set_show_line_marks (sView, TRUE);
-	gtk_source_view_set_show_line_numbers (sView, TRUE);
+
+	gtk_source_view_set_show_line_marks (GTK_SOURCE_VIEW(sView), TRUE);
+	gtk_source_view_set_show_line_numbers (GTK_SOURCE_VIEW(sView), TRUE);
+
+	add_source_mark_attributes (GTK_SOURCE_VIEW(sView));
+	g_signal_connect (GTK_SOURCE_VIEW(sView),
+			  "line-mark-activated",
+			  G_CALLBACK (line_mark_activated_cb),
+			  sBuf);
 
 	/* Set default Font name,size */
 	font_desc = pango_font_description_from_string ("mono 8");
